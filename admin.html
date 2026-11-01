@@ -65,11 +65,7 @@
         <main id="desktop-main" class="hidden md:block flex-1 p-8 overflow-y-auto bg-[#0f172a]"></main>
     </div>
 
-    <!-- ============================================== -->
-    <!-- TEMPLATES FOR TABS                             -->
-    <!-- ============================================== -->
-
-    <!-- TAB: DASHBOARD -->
+    <!-- TEMPLATES FOR TABS -->
     <template id="tpl-dashboard">
         <h2 class="text-2xl font-bold mb-6">Real-Time Overview</h2>
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
@@ -96,7 +92,6 @@
         </div>
     </template>
 
-    <!-- TAB: USERS -->
     <template id="tpl-users">
         <h2 class="text-2xl font-bold mb-6">User Management</h2>
         <div class="glass-panel overflow-x-auto shadow-xl">
@@ -110,14 +105,13 @@
                         <th class="p-4 text-right">Action</th>
                     </tr>
                 </thead>
-                <tbody id="admin-users-list" class="divide-y border-slate-800">
+                <tbody id="admin-users-list" class="divide-y divide-slate-800">
                     <tr><td colspan="5" class="p-8 text-center text-slate-400"><i class="fa-solid fa-circle-notch fa-spin"></i> Loading...</td></tr>
                 </tbody>
             </table>
         </div>
     </template>
 
-    <!-- TAB: WITHDRAWALS -->
     <template id="tpl-withdrawals">
         <h2 class="text-2xl font-bold mb-6">Withdrawal Requests</h2>
         <div class="glass-panel overflow-x-auto shadow-xl">
@@ -138,11 +132,9 @@
         </div>
     </template>
 
-    <!-- TAB: SETTINGS -->
     <template id="tpl-settings">
         <div class="flex justify-between items-center mb-6">
             <h2 class="text-2xl font-bold">App Settings & Customization</h2>
-            <!-- MAINTENANCE TOGGLE -->
             <label class="flex items-center space-x-2 cursor-pointer bg-slate-900 px-4 py-2 rounded-lg border border-slate-700">
                 <span class="text-sm font-bold text-slate-300">Maintenance Mode</span>
                 <input type="checkbox" id="set-maintenance" class="w-5 h-5 accent-red-500">
@@ -150,7 +142,6 @@
         </div>
 
         <div class="glass-panel p-8 max-w-4xl shadow-xl">
-            
             <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
                 <div><label class="block text-xs font-bold text-slate-400 mb-2 uppercase">Global CPM ($)</label><input type="number" step="0.01" id="set-cpm" class="w-full bg-slate-900 border border-slate-700 rounded p-3 text-white focus:border-indigo-500 outline-none"></div>
                 <div><label class="block text-xs font-bold text-slate-400 mb-2 uppercase">Referral Bonus (%)</label><input type="number" id="set-ref" class="w-full bg-slate-900 border border-slate-700 rounded p-3 text-white focus:border-indigo-500 outline-none"></div>
@@ -188,7 +179,6 @@
         </div>
     </template>
 
-    <!-- TAB: BROADCAST -->
     <template id="tpl-broadcast">
         <h2 class="text-2xl font-bold mb-6">Bot Broadcast</h2>
         <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
@@ -199,15 +189,15 @@
                 </div>
                 <div class="mb-4">
                     <label class="block text-xs font-bold text-slate-400 mb-2 uppercase">Message Caption (HTML Supported)</label>
-                    <textarea id="bc-caption" rows="5" placeholder="<b>Hello User!</b>&#10;Check out our new update. 🔥" class="w-full bg-slate-900 border border-slate-700 rounded p-3 text-white focus:border-indigo-500 outline-none" oninput="updatePreview()"></textarea>
+                    <textarea id="bc-caption" rows="5" placeholder="<b>Hello User!</b>&#10;Check out our new update." class="w-full bg-slate-900 border border-slate-700 rounded p-3 text-white focus:border-indigo-500 outline-none" oninput="updatePreview()"></textarea>
                 </div>
                 <div class="mb-6 p-4 bg-slate-900 rounded-lg border border-slate-700">
                     <label class="flex items-center space-x-3 cursor-pointer mb-3">
                         <input type="checkbox" id="bc-btn-toggle" checked class="w-5 h-5 rounded accent-indigo-500" onchange="updatePreview()">
                         <span class="text-sm font-bold text-white">Include "👉 Open now 👈" Button</span>
                     </label>
-                    <label class="block text-xs font-bold text-slate-400 mb-2 uppercase">Existing Mini App Web URL</label>
-                    <input type="url" id="bc-mini-app-url" value="https://short2earn-indol.vercel.app/" class="w-full bg-slate-800 border border-slate-700 rounded p-3 text-white text-sm focus:border-indigo-500 outline-none">
+                    <label class="block text-xs font-bold text-slate-400 mb-2 uppercase">Mini App Web URL</label>
+                    <input type="url" id="bc-mini-app-url" value="https://short2earn-hqlv.vercel.app/" class="w-full bg-slate-800 border border-slate-700 rounded p-3 text-white text-sm focus:border-indigo-500 outline-none">
                 </div>
                 <button id="btn-send-broadcast" onclick="startBroadcast()" class="w-full bg-amber-600 hover:bg-amber-500 px-6 py-4 rounded-lg font-bold text-white shadow-lg transition-colors flex items-center justify-center">
                     <i class="fa-solid fa-paper-plane mr-2"></i> Send to All Users
@@ -236,14 +226,13 @@
     </template>
 
     <script>
-        // --- API CONFIGURATION ---
+        // --- LIVE API CONFIGURATION ---
         const SUPABASE_URL = 'https://uxyrvqhxtegstxhuvxre.supabase.co'; 
         const SUPABASE_ANON_KEY = 'sb_publishable_iO50h66TI1NByIRI0oH6EQ_pFA7Azct';
-        const VERCEL_BROADCAST_API = 'https://short2earn-indol.vercel.app/api/broadcast'; 
+        const VERCEL_BROADCAST_API = 'https://short2earn-hqlv.vercel.app/api/broadcast'; 
         const ADMIN_PASSWORD = "admin"; 
         
-        // Auto-cleans URL if pasted with /rest/v1/ suffix
-        let dbClient = window.supabase.createClient(SUPABASE_URL.replace(/\/rest\/v1\/?$/, "").replace(/\/$/, ""), SUPABASE_ANON_KEY);
+        let dbClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
         let settingsId = null;
 
         // LOGIN
@@ -282,21 +271,17 @@
         // --- DASHBOARD LOGIC ---
         async function loadDashboard() {
             try {
-                // Total Users
                 const { count: uCount } = await dbClient.from('users').select('*', { count: 'exact', head: true });
                 document.getElementById('stat-total-users').innerText = uCount || 0;
 
-                // Blocked Users
                 const { count: bCount } = await dbClient.from('users').select('*', { count: 'exact', head: true }).eq('is_blocked', true);
                 document.getElementById('stat-blocked').innerText = bCount || 0;
 
-                // Active Today (Count distinct clicks today)
                 const today = new Date().toISOString().split('T')[0];
                 const { data: activeData } = await dbClient.from('click_logs').select('clicker_tg_id').gte('created_at', today);
                 const uniqueActive = new Set(activeData?.map(d => d.clicker_tg_id)).size;
                 document.getElementById('stat-active-users').innerText = uniqueActive || 0;
 
-                // Financial Stats
                 const { data: wData } = await dbClient.from('withdrawals').select('amount, status');
                 let paid = 0, pending = 0;
                 if(wData) {
@@ -347,13 +332,13 @@
         }
 
         window.deleteUser = async function(userId) {
-            if(!confirm(`WARNING: Are you sure you want to PERMANENTLY DELETE this user? This action cannot be undone.`)) return;
+            if(!confirm(`WARNING: Are you sure you want to PERMANENTLY DELETE this user?`)) return;
             try {
                 const { error } = await dbClient.from('users').delete().eq('id', userId);
                 if(error) throw error;
                 loadUsers();
             } catch(e) {
-                alert("Deletion failed! (Tip: Enable 'Cascade Delete' on foreign keys in Supabase database settings). Error: " + e.message);
+                alert("Deletion failed! Error: " + e.message);
             }
         }
 
@@ -395,8 +380,6 @@
             if(!confirm(`Mark this withdrawal as ${newStatus.toUpperCase()}?`)) return;
             try {
                 await dbClient.from('withdrawals').update({ status: newStatus }).eq('id', wId);
-                
-                // If rejected, refund money back to user balance
                 if(newStatus === 'rejected') {
                     const { data: u } = await dbClient.from('users').select('balance').eq('id', userId).single();
                     if(u) {
