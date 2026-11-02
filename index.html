@@ -255,16 +255,8 @@
     </div>
 
     <!-- ADVANCED AD VIEWING UI -->
-    <div id="ui-ad-viewer" class="hidden min-h-screen flex flex-col items-center justify-center p-3 sm:p-6 z-50">
-        <!-- TOP BANNER (320x50) -->
-        <div class="ad-slot w-full max-w-sm flex justify-center items-center mb-5 overflow-hidden" aria-label="Advertisement">
-            <iframe title="Top banner advertisement" width="320" height="50" scrolling="no" frameborder="0"
-                style="border:0;max-width:100%;overflow:hidden"
-                srcdoc="<!doctype html><html><head><meta name='viewport' content='width=device-width,initial-scale=1'></head><body style='margin:0;padding:0;overflow:hidden;background:transparent'><script>var atOptions={'key':'ed086d3fabcf505a5f83386448b578e0','format':'iframe','height':50,'width':320,'params':{}};&lt;/script><script src='https://dcengg.org/22/ed086d3fabcf505a5f83386448b578e0'>&lt;/script></body></html>">
-            </iframe>
-        </div>
-
-        <div class="glass-panel w-full max-w-sm p-6 sm:p-8 text-center shadow-2xl relative overflow-hidden">
+    <div id="ui-ad-viewer" class="hidden min-h-screen flex flex-col items-center justify-center p-6 z-50">
+        <div class="glass-panel w-full max-w-sm p-8 text-center shadow-2xl relative overflow-hidden">
             <div id="ad-blocker-warning" class="hidden bg-red-900/50 border border-red-500 rounded-lg p-4 mb-4">
                 <i class="fa-solid fa-ban text-3xl text-red-500 mb-2"></i><h3 class="text-red-400 font-bold text-sm mb-1">Ad Blocker Detected!</h3><p class="text-xs text-white">Disable Ad Blocker to unlock.</p>
             </div>
@@ -276,14 +268,6 @@
             <h2 class="text-2xl font-bold mb-2 text-white" id="ad-step-title">Please Wait...</h2>
             <button id="btn-watch-ad" disabled class="w-full bg-slate-800 text-slate-500 font-bold py-4 rounded-xl transition-all flex justify-center items-center shadow-lg"><span>Wait for Timer...</span></button>
             <button id="btn-get-link" class="hidden w-full success-gradient text-white font-bold py-4 rounded-xl text-lg shadow-lg shadow-emerald-500/30"><i class="fa-solid fa-arrow-up-right-from-square mr-2"></i> GET LINK</button>
-        </div>
-
-        <!-- BOTTOM RECTANGLE BANNER (300x250) -->
-        <div class="ad-slot w-full max-w-sm flex justify-center items-center mt-5 overflow-hidden" aria-label="Advertisement">
-            <iframe title="Bottom rectangle advertisement" width="300" height="250" scrolling="no" frameborder="0"
-                style="border:0;max-width:100%;overflow:hidden"
-                srcdoc="<!doctype html><html><head><meta name='viewport' content='width=device-width,initial-scale=1'></head><body style='margin:0;padding:0;overflow:hidden;background:transparent'><script>var atOptions={'key':'cbeb41277e9f274ec80a1f421e89a52c','format':'iframe','height':250,'width':300,'params':{}};&lt;/script><script src='https://dcengg.org/22/cbeb41277e9f274ec80a1f421e89a52c'>&lt;/script></body></html>">
-            </iframe>
         </div>
     </div>
 
@@ -600,7 +584,7 @@
         function setupAdStep() {
             document.getElementById('ad-progress-badge').innerText = `Ad ${currentAdStep} of ${totalAdsRequired}`;
             document.getElementById('ad-timer-text').classList.remove('hidden'); document.getElementById('ad-loader-ring').classList.add('hidden');
-            let timeLeft = Number(adminSettings.ad_timer ?? adminSettings.ad_time ?? 5);\n            if (!Number.isFinite(timeLeft) || timeLeft < 1) timeLeft = 5;
+            let timeLeft = adminSettings.ad_timer || 5;
             const btn = document.getElementById('btn-watch-ad'); const timerEl = document.getElementById('ad-timer-text');
             btn.disabled = true; btn.className = "w-full bg-slate-800 text-slate-500 font-bold py-4 rounded-xl flex justify-center items-center shadow-inner";
             btn.innerHTML = `Wait ${timeLeft}s...`;
@@ -644,48 +628,12 @@
             } else if (window.invalidClickReason === "duplicate") {
                 safeAlert("⚠️ You already viewed this link! Earnings won't be duplicated.");
             } else {
-                const clickerId = tg.initDataUnsafe?.user?.id || 0;
-                try {
-                    const response = await fetch(`${VERCEL_API_URL}/reward`, {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({ short_id: window.currentShortId, clicker_tg_id: clickerId })
-                    });
-                    if (!response.ok) {
-                        console.error("Reward/view-count API failed:", response.status, await response.text());
-                        safeAlert("View unlock ho gaya, lekin view count update nahi hua. Server API logs check karein.");
-                    } else if (currentUserData?.id) {
-                        // Refresh the displayed count after the backend processes the reward.
-                        const { data: refreshedUser, error: refreshError } = await dbClient
-                            .from('users').select('total_clicks,balance,today_earnings')
-                            .eq('id', currentUserData.id).single();
-                        if (!refreshError && refreshedUser) {
-                            currentUserData = { ...currentUserData, ...refreshedUser };
-                            const statViews = document.getElementById('stat-views');
-                            if (statViews) statViews.innerText = currentUserData.total_clicks || 0;
-                            const balance = `$${parseFloat(currentUserData.balance || 0).toFixed(2)}`;
-                            document.getElementById('header-balance').innerText = balance;
-                            document.getElementById('wallet-balance-page').innerText = balance;
-                            document.getElementById('stat-today-earn').innerText = `$${parseFloat(currentUserData.today_earnings || 0).toFixed(4)}`;
-                        }
-                    }
-                } catch (e) {
-                    console.error("Reward/view-count request failed:", e);
-                    safeAlert("View count server se update nahi ho saka. Vercel API check karein.");
-                }
+                let clickerId = tg.initDataUnsafe?.user?.id || 0;
+                try { fetch(`${VERCEL_API_URL}/reward`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ short_id: window.currentShortId, clicker_tg_id: clickerId }) }); } catch(e){}
             }
 
-            const { data, error } = await dbClient.from('links').select('original_url').eq('short_id', window.currentShortId).single();
-            if (error || !data?.original_url) {
-                getLinkBtn.disabled = true;
-                getLinkBtn.innerText = "Link unavailable";
-                console.error("Could not load destination URL:", error);
-                return;
-            }
-            getLinkBtn.onclick = () => {
-                try { tg.openLink(data.original_url); }
-                catch (e) { window.open(data.original_url, '_blank', 'noopener'); }
-            };
+            const { data } = await dbClient.from('links').select('original_url').eq('short_id', window.currentShortId).single();
+            if(data) getLinkBtn.onclick = () => tg.openLink(data.original_url);
         }
 
         window.onload = initApp;
