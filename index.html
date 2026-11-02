@@ -7,8 +7,8 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
-    <!-- Monetag Telegram SDK with HTTPS -->
-    <script src="https://libtl.com/sdk.js" data-zone="12158143" data-sdk="show_12158143"></script>
+    <!-- Defer Load to Prevent Android System WebView Crash -->
+    <script defer src="https://libtl.com/sdk.js" data-zone="12158143" data-sdk="show_12158143"></script>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     
     <style>
@@ -279,20 +279,26 @@
         let currentUserData = null;
         let adminSettings = { cpm: 2, ad_time: 5, ads_per_link: 1, refer_percent: 10, min_withdraw: 5.0, maintenance_mode: false, payment_methods: "UPI" };
         
-        // --- SAFE TELEGRAM WEBAPP INIT ---
         const tg = window.Telegram?.WebApp;
-        if (tg) {
-            try {
-                tg.ready();
-                tg.expand();
-                tg.setHeaderColor('#0f172a');
-            } catch(e) {
-                console.warn("TG Init non-critical warning:", e);
+
+        function initTelegramSafely() {
+            if (tg) {
+                try {
+                    tg.ready();
+                    if (tg.setHeaderColor) {
+                        tg.setHeaderColor('bg_color'); 
+                    }
+                    if (tg.expand) {
+                        tg.expand();
+                    }
+                } catch(e) {
+                    console.warn("TG Init safe warning:", e);
+                }
             }
         }
 
         let currentAdStep = 1; 
-        let totalAdsRequired = 1; // Strict 1 ad setup
+        let totalAdsRequired = 1; 
         window.invalidClickReason = null; 
 
         function safeAlert(msg) { try { tg ? tg.showAlert(msg) : alert(msg); } catch(e) { alert(msg); } }
@@ -368,7 +374,7 @@
             try {
                 const { data } = await dbClient.from('settings').select('*').limit(1).single();
                 if(data) adminSettings = { ...adminSettings, ...data };
-                totalAdsRequired = 1; // Strict 1 ad locked
+                totalAdsRequired = 1;
             } catch(e){}
         }
 
@@ -377,7 +383,7 @@
                 const { data: linkData } = await dbClient.from('links').select('id, user_id').eq('short_id', window.currentShortId).single();
                 if(linkData && currentUserData) {
                     if(linkData.user_id === currentUserData.id) { 
-                        console.log("Self click verified for test");
+                        console.log("Self click verified");
                     }
                 }
             } catch(e) {}
@@ -601,18 +607,11 @@
         }
 
         function checkAdBlocker(btn, timerEl) {
-            if (typeof show_12158143 === 'undefined') {
-                document.getElementById('ad-blocker-warning').classList.remove('hidden');
-                document.getElementById('ad-step-title').innerText = "Action Required";
-                btn.classList.add('hidden'); 
-                timerEl.innerHTML = '<i class="fa-solid fa-ban text-red-500 text-xl"></i>';
-            } else {
-                timerEl.innerHTML = '<i class="fa-solid fa-play text-indigo-500"></i>';
-                btn.disabled = false; 
-                btn.className = "w-full primary-gradient text-white font-bold py-4 rounded-xl flex justify-center items-center shadow-lg shadow-indigo-500/30";
-                btn.innerHTML = "Click to Watch Ad"; 
-                btn.onclick = executeAdClick;
-            }
+            timerEl.innerHTML = '<i class="fa-solid fa-play text-indigo-500"></i>';
+            btn.disabled = false; 
+            btn.className = "w-full primary-gradient text-white font-bold py-4 rounded-xl flex justify-center items-center shadow-lg shadow-indigo-500/30";
+            btn.innerHTML = "Click to Watch Ad"; 
+            btn.onclick = executeAdClick;
         }
 
         function executeAdClick() {
@@ -623,8 +622,8 @@
             document.getElementById('ad-timer-text').classList.add('hidden');
 
             try {
-                if (typeof show_12158143 === 'function') { 
-                    show_12158143().then(() => { 
+                if (typeof window.show_12158143 === 'function') { 
+                    window.show_12158143().then(() => { 
                         showFinalLink(); 
                     }).catch((err) => { 
                         console.warn("Monetag dismissed or error:", err);
@@ -678,7 +677,10 @@
             }
         }
 
-        window.onload = initApp;
+        window.onload = () => {
+            initTelegramSafely();
+            initApp();
+        };
     </script>
 </body>
 </html>
