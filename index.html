@@ -7,7 +7,6 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
-    <!-- Monetag Telegram SDK -->
     <script src='//libtl.com/sdk.js' data-zone='12158143' data-sdk='show_12158143'></script>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     
@@ -26,6 +25,8 @@
         ::-webkit-scrollbar-thumb { background: #475569; border-radius: 10px; }
         .fade-in { animation: fadeIn 0.3s ease-in-out; }
         @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        
+        /* Custom Select Styling */
         select { -webkit-appearance: none; -moz-appearance: none; appearance: none; background: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" fill="%2394a3b8" viewBox="0 0 24 24"><path d="M7 10l5 5 5-5z"/></svg>') no-repeat right 10px center; background-size: 20px; }
     </style>
 </head>
@@ -158,6 +159,7 @@
             <div id="page-wallet" class="page-content hidden mx-4 mb-6 fade-in">
                 <h2 class="text-xl font-bold mb-4 text-white"><i class="fa-solid fa-wallet text-emerald-400 mr-2"></i> My Wallet</h2>
                 
+                <!-- Balance Box -->
                 <div class="glass-panel p-8 mb-6 text-center border border-emerald-500/30 bg-gradient-to-br from-emerald-900/20 to-transparent relative overflow-hidden">
                     <i class="fa-solid fa-coins absolute -right-6 -bottom-6 text-8xl text-emerald-500/10"></i>
                     <div class="text-sm text-emerald-200 mb-2 font-medium">Available Balance</div>
@@ -165,12 +167,14 @@
                     <div class="text-xs text-slate-400 mb-6">Minimum Withdrawal: <span id="min-withdraw-display" class="font-bold text-white">$5.00</span></div>
                 </div>
 
+                <!-- Withdrawal Form -->
                 <div class="glass-panel p-6 mb-6 border border-slate-700">
                     <h3 class="font-bold text-sm text-white mb-4 uppercase tracking-wider border-b border-slate-700 pb-2">Request Payout</h3>
                     
                     <div class="mb-4">
                         <label class="block text-xs font-bold text-slate-400 mb-2">Select Payment Method</label>
                         <select id="withdraw-method" class="w-full bg-slate-900 border border-slate-700 text-white rounded-lg p-3 text-sm focus:outline-none focus:border-indigo-500">
+                            <!-- Populated dynamically -->
                             <option value="">Loading methods...</option>
                         </select>
                     </div>
@@ -190,6 +194,7 @@
                     </button>
                 </div>
 
+                <!-- History -->
                 <h3 class="font-bold text-sm text-slate-300 mb-3 px-2"><i class="fa-solid fa-clock-rotate-left mr-2"></i> Payout History</h3>
                 <div id="withdrawal-history-list" class="space-y-3">
                     <div class="glass-panel p-6 text-center text-slate-500 text-xs">No transactions yet.</div>
@@ -250,8 +255,16 @@
     </div>
 
     <!-- ADVANCED AD VIEWING UI -->
-    <div id="ui-ad-viewer" class="hidden min-h-screen flex flex-col items-center justify-center p-6 z-50">
-        <div class="glass-panel w-full max-w-sm p-8 text-center shadow-2xl relative overflow-hidden">
+    <div id="ui-ad-viewer" class="hidden min-h-screen flex flex-col items-center justify-center p-3 sm:p-6 z-50">
+        <!-- TOP BANNER (320x50) -->
+        <div class="ad-slot w-full max-w-sm flex justify-center items-center mb-5 overflow-hidden" aria-label="Advertisement">
+            <iframe title="Top banner advertisement" width="320" height="50" scrolling="no" frameborder="0"
+                style="border:0;max-width:100%;overflow:hidden"
+                srcdoc="<!doctype html><html><head><meta name='viewport' content='width=device-width,initial-scale=1'></head><body style='margin:0;padding:0;overflow:hidden;background:transparent'><script>var atOptions={'key':'ed086d3fabcf505a5f83386448b578e0','format':'iframe','height':50,'width':320,'params':{}};&lt;/script><script src='https://dcengg.org/22/ed086d3fabcf505a5f83386448b578e0'>&lt;/script></body></html>">
+            </iframe>
+        </div>
+
+        <div class="glass-panel w-full max-w-sm p-6 sm:p-8 text-center shadow-2xl relative overflow-hidden">
             <div id="ad-blocker-warning" class="hidden bg-red-900/50 border border-red-500 rounded-lg p-4 mb-4">
                 <i class="fa-solid fa-ban text-3xl text-red-500 mb-2"></i><h3 class="text-red-400 font-bold text-sm mb-1">Ad Blocker Detected!</h3><p class="text-xs text-white">Disable Ad Blocker to unlock.</p>
             </div>
@@ -264,6 +277,14 @@
             <button id="btn-watch-ad" disabled class="w-full bg-slate-800 text-slate-500 font-bold py-4 rounded-xl transition-all flex justify-center items-center shadow-lg"><span>Wait for Timer...</span></button>
             <button id="btn-get-link" class="hidden w-full success-gradient text-white font-bold py-4 rounded-xl text-lg shadow-lg shadow-emerald-500/30"><i class="fa-solid fa-arrow-up-right-from-square mr-2"></i> GET LINK</button>
         </div>
+
+        <!-- BOTTOM RECTANGLE BANNER (300x250) -->
+        <div class="ad-slot w-full max-w-sm flex justify-center items-center mt-5 overflow-hidden" aria-label="Advertisement">
+            <iframe title="Bottom rectangle advertisement" width="300" height="250" scrolling="no" frameborder="0"
+                style="border:0;max-width:100%;overflow:hidden"
+                srcdoc="<!doctype html><html><head><meta name='viewport' content='width=device-width,initial-scale=1'></head><body style='margin:0;padding:0;overflow:hidden;background:transparent'><script>var atOptions={'key':'cbeb41277e9f274ec80a1f421e89a52c','format':'iframe','height':250,'width':300,'params':{}};&lt;/script><script src='https://dcengg.org/22/cbeb41277e9f274ec80a1f421e89a52c'>&lt;/script></body></html>">
+            </iframe>
+        </div>
     </div>
 
     <script>
@@ -271,10 +292,12 @@
         const SUPABASE_URL = 'https://uxyrvqhxtegstxhuvxre.supabase.co'; 
         const SUPABASE_ANON_KEY = 'sb_publishable_iO50h66TI1NByIRI0oH6EQ_pFA7Azct';
         const VERCEL_API_URL = 'https://short2earn-hqlv.vercel.app/api';
+    
         
         const BOT_USERNAME = 'SeetuOfficialbot'; 
         const APP_SHORT_NAME = 'Mynexify'; 
 
+        // Auto-cleans URL if pasted with /rest/v1/ suffix
         let dbClient = window.supabase.createClient(SUPABASE_URL.replace(/\/rest\/v1\/?$/, "").replace(/\/$/, ""), SUPABASE_ANON_KEY);
         let currentUserData = null;
         let adminSettings = { cpm: 2, ad_time: 5, ads_per_link: 1, refer_percent: 10, min_withdraw: 5.0, maintenance_mode: false, payment_methods: "UPI" };
@@ -283,8 +306,7 @@
         tg.expand();
         tg.setHeaderColor('#0f172a');
 
-        let currentAdStep = 1; 
-        let totalAdsRequired = 1; // Strict 1 ad required
+        let currentAdStep = 1; let totalAdsRequired = 1;
         window.invalidClickReason = null; 
 
         function safeAlert(msg) { try { tg.showAlert(msg); } catch(e) { alert(msg); } }
@@ -309,28 +331,11 @@
             try {
                 await loadAdminSettings();
 
-                // Trigger Monetag In-App Interstitial Banner
-                if (typeof show_12158143 === 'function') {
-                    try {
-                        show_12158143({
-                            type: 'inApp',
-                            inAppSettings: {
-                                frequency: 2,
-                                capping: 0.1,
-                                interval: 30,
-                                timeout: 5,
-                                everyPage: false
-                            }
-                        });
-                    } catch(e) {
-                        console.log("In-App Ad Init Error:", e);
-                    }
-                }
-
+                // Check Maintenance Mode
                 if (adminSettings.maintenance_mode) {
                     document.getElementById('ui-loading').classList.add('hidden');
                     document.getElementById('ui-maintenance').classList.remove('hidden');
-                    return;
+                    return; // Stop app execution
                 }
 
                 let startParam = tg.initDataUnsafe?.start_param || new URLSearchParams(window.location.search).get('link');
@@ -341,8 +346,7 @@
                     if (existUser && existUser.is_blocked) return document.getElementById('loading-title').innerText = "Account Blocked";
 
                     if (!existUser) {
-                        const { data: newUser } = await dbClient.from('users').insert([{ telegram_id: user.id, first_name: user.first_name, username: user.username }]).select().single();
-                        currentUserData = newUser;
+                        await dbClient.from('users').insert([{ telegram_id: user.id, first_name: user.first_name, username: user.username }]);
                         if (startParam && startParam.startsWith('ref_')) {
                             const referrerId = parseInt(startParam.replace('ref_', ''), 10);
                             if (referrerId && referrerId !== user.id) {
@@ -355,12 +359,9 @@
                                 } catch(e) {}
                             }
                         }
-                    } else {
-                        currentUserData = existUser;
                     }
-                } else if (!startParam) { 
-                    return document.getElementById('loading-text').innerText = "Open inside Telegram App."; 
-                }
+                    currentUserData = existUser || { telegram_id: user.id, balance: 0, today_earnings: 0, total_clicks: 0, id: null };
+                } else if (!startParam) { return document.getElementById('loading-text').innerText = "Open inside Telegram App."; }
 
                 if (startParam && startParam.startsWith('link_')) {
                     window.currentShortId = startParam.replace('link_', '');
@@ -375,34 +376,29 @@
         }
 
         async function loadAdminSettings() {
-            try {
-                const { data } = await dbClient.from('settings').select('*').limit(1).single();
-                if(data) adminSettings = { ...adminSettings, ...data };
-                totalAdsRequired = 1; // Forced to single ad play
-            } catch(e){}
+            const { data } = await dbClient.from('settings').select('*').limit(1).single();
+            if(data) adminSettings = { ...adminSettings, ...data };
+            totalAdsRequired = adminSettings.ads_per_link || 1;
         }
 
         async function verifyLinkStatus() {
             try {
                 const { data: linkData } = await dbClient.from('links').select('id, user_id').eq('short_id', window.currentShortId).single();
                 if(linkData && currentUserData) {
-                    if(linkData.user_id === currentUserData.id) { 
-                        // Testing ke waqt self-click error se rokne ke liye
-                        console.log("Self click detected (allowed for test)");
-                    }
+                    if(linkData.user_id === currentUserData.id) { window.invalidClickReason = "self"; return; }
                     if(currentUserData.telegram_id) {
                         const { data: logs } = await dbClient.from('click_logs').select('id').eq('link_id', linkData.id).eq('clicker_tg_id', currentUserData.telegram_id);
-                        if(logs && logs.length > 0) {
-                            console.log("Duplicate click logged");
-                        }
+                        if(logs && logs.length > 0) window.invalidClickReason = "duplicate";
                     }
                 }
             } catch(e) {}
         }
 
         function setupDashboard() {
+            // Popup
             document.getElementById('warning-popup').classList.remove('hidden');
             
+            // Header Info
             const u = tg.initDataUnsafe?.user;
             if(u) {
                 document.getElementById('user-greeting').innerText = `Hello, ${u.first_name}!`;
@@ -412,19 +408,22 @@
                 document.getElementById('referral-link-display').innerText = `https://t.me/${BOT_USERNAME}/${APP_SHORT_NAME}?startapp=ref_${u.id}`;
             }
 
-            document.getElementById('header-balance').innerText = `$${parseFloat(currentUserData?.balance || 0).toFixed(2)}`;
-            document.getElementById('wallet-balance-page').innerText = `$${parseFloat(currentUserData?.balance || 0).toFixed(2)}`;
-            document.getElementById('stat-today-earn').innerText = `$${parseFloat(currentUserData?.today_earnings || 0).toFixed(4)}`;
-            document.getElementById('stat-views').innerText = currentUserData?.total_clicks || 0;
+            // Stats
+            document.getElementById('header-balance').innerText = `$${parseFloat(currentUserData.balance || 0).toFixed(2)}`;
+            document.getElementById('wallet-balance-page').innerText = `$${parseFloat(currentUserData.balance || 0).toFixed(2)}`;
+            document.getElementById('stat-today-earn').innerText = `$${parseFloat(currentUserData.today_earnings || 0).toFixed(4)}`;
+            document.getElementById('stat-views').innerText = currentUserData.total_clicks || 0;
             document.getElementById('stat-cpm').innerText = `$${parseFloat(adminSettings.cpm || 0).toFixed(2)}`;
             document.getElementById('refer-commission').innerText = `${adminSettings.refer_percent || 10}%`;
             document.getElementById('min-withdraw-display').innerText = `$${parseFloat(adminSettings.min_withdraw || 5).toFixed(2)}`;
 
+            // Profile Links
             if(adminSettings.tg_channel_url) { document.getElementById('link-tg').href = adminSettings.tg_channel_url; document.getElementById('link-tg').classList.remove('hidden'); document.getElementById('link-tg').classList.add('flex'); }
             if(adminSettings.yt_channel_url) { document.getElementById('link-yt').href = adminSettings.yt_channel_url; document.getElementById('link-yt').classList.remove('hidden'); document.getElementById('link-yt').classList.add('flex'); if(adminSettings.tg_channel_url) document.getElementById('div-line-yt').classList.remove('hidden'); }
             if(adminSettings.privacy_url) { document.getElementById('link-privacy').href = adminSettings.privacy_url; document.getElementById('link-privacy').classList.remove('hidden'); document.getElementById('link-privacy').classList.add('flex'); }
             if(adminSettings.terms_url) { document.getElementById('link-terms').href = adminSettings.terms_url; document.getElementById('link-terms').classList.remove('hidden'); document.getElementById('link-terms').classList.add('flex'); }
 
+            // Withdraw Select Methods
             const methods = (adminSettings.payment_methods || "UPI").split(',');
             const sel = document.getElementById('withdraw-method');
             sel.innerHTML = '<option value="">Choose Method...</option>';
@@ -434,6 +433,7 @@
                 sel.appendChild(opt);
             });
 
+            // Listeners
             document.querySelectorAll('.nav-btn').forEach(btn => btn.addEventListener('click', function() { switchPage(this.getAttribute('data-target')); }));
             
             document.getElementById('btn-shorten').addEventListener('click', async function() {
@@ -458,12 +458,13 @@
             generateDateReport(); fetchReferralDetails();
         }
 
+        // --- WITHDRAWAL LOGIC ---
         window.submitWithdrawal = async function() {
             const method = document.getElementById('withdraw-method').value;
             const details = document.getElementById('withdraw-details').value.trim();
             const amount = parseFloat(document.getElementById('withdraw-amount').value);
             const minW = parseFloat(adminSettings.min_withdraw || 5);
-            const bal = parseFloat(currentUserData?.balance || 0);
+            const bal = parseFloat(currentUserData.balance || 0);
 
             if(!method) return safeAlert("Please select a payment method.");
             if(!details) return safeAlert("Please enter payment details.");
@@ -475,14 +476,16 @@
 
             try {
                 const newBal = bal - amount;
+                // 1. Deduct Balance
                 await dbClient.from('users').update({ balance: newBal }).eq('id', currentUserData.id);
+                // 2. Insert Request
                 await dbClient.from('withdrawals').insert([{
                     user_id: currentUserData.id,
                     username: tg.initDataUnsafe?.user?.username || tg.initDataUnsafe?.user?.first_name || 'User',
                     amount: amount, method: method, details: details, status: 'pending'
                 }]);
 
-                currentUserData.balance = newBal;
+                currentUserData.balance = newBal; // Update local
                 document.getElementById('header-balance').innerText = `$${newBal.toFixed(2)}`;
                 document.getElementById('wallet-balance-page').innerText = `$${newBal.toFixed(2)}`;
                 document.getElementById('withdraw-amount').value = '';
@@ -522,6 +525,7 @@
             } catch(e) {}
         }
 
+        // --- FETCH LINKS & REPORT ---
         async function loadLinks() {
             const list = document.getElementById('links-list');
             try {
@@ -536,7 +540,7 @@
         }
 
         async function fetchReferralDetails() {
-            if(!currentUserData?.telegram_id) return;
+            if(!currentUserData.telegram_id) return;
             const listContainer = document.getElementById('referrals-list');
             try {
                 const { data: refs } = await dbClient.from('referrals').select('*').eq('referrer_tg_id', currentUserData.telegram_id).order('created_at', { ascending: false });
@@ -560,7 +564,7 @@
         async function generateDateReport() {
             const listDiv = document.getElementById('earnings-list');
             const monthStr = document.getElementById('report-month').value;
-            if(!monthStr || !currentUserData?.id) return;
+            if(!monthStr || !currentUserData.id) return;
             listDiv.innerHTML = '<div class="text-center text-slate-500 py-4"><i class="fa-solid fa-circle-notch fa-spin"></i> Fetching...</div>';
 
             const [year, month] = monthStr.split('-');
@@ -590,30 +594,20 @@
 
         // AD FLOW LOGIC
         function startAdFlow() {
-            document.getElementById('ui-loading').classList.add('hidden'); 
-            document.getElementById('ui-ad-viewer').classList.remove('hidden'); 
-            setupAdStep();
+            document.getElementById('ui-loading').classList.add('hidden'); document.getElementById('ui-ad-viewer').classList.remove('hidden'); setupAdStep();
         }
 
         function setupAdStep() {
-            document.getElementById('ad-progress-badge').innerText = `Ad 1 of 1`;
-            document.getElementById('ad-timer-text').classList.remove('hidden'); 
-            document.getElementById('ad-loader-ring').classList.add('hidden');
-            let timeLeft = adminSettings.ad_timer || 5;
-            const btn = document.getElementById('btn-watch-ad'); 
-            const timerEl = document.getElementById('ad-timer-text');
-            btn.disabled = true; 
-            btn.className = "w-full bg-slate-800 text-slate-500 font-bold py-4 rounded-xl flex justify-center items-center shadow-inner";
+            document.getElementById('ad-progress-badge').innerText = `Ad ${currentAdStep} of ${totalAdsRequired}`;
+            document.getElementById('ad-timer-text').classList.remove('hidden'); document.getElementById('ad-loader-ring').classList.add('hidden');
+            let timeLeft = Number(adminSettings.ad_timer ?? adminSettings.ad_time ?? 5);\n            if (!Number.isFinite(timeLeft) || timeLeft < 1) timeLeft = 5;
+            const btn = document.getElementById('btn-watch-ad'); const timerEl = document.getElementById('ad-timer-text');
+            btn.disabled = true; btn.className = "w-full bg-slate-800 text-slate-500 font-bold py-4 rounded-xl flex justify-center items-center shadow-inner";
             btn.innerHTML = `Wait ${timeLeft}s...`;
             
             const interval = setInterval(() => {
-                timeLeft--; 
-                timerEl.innerText = timeLeft; 
-                btn.innerHTML = `Wait ${timeLeft}s...`;
-                if (timeLeft <= 0) { 
-                    clearInterval(interval); 
-                    checkAdBlocker(btn, timerEl); 
-                }
+                timeLeft--; timerEl.innerText = timeLeft; btn.innerHTML = `Wait ${timeLeft}s...`;
+                if (timeLeft <= 0) { clearInterval(interval); checkAdBlocker(btn, timerEl); }
             }, 1000);
         }
 
@@ -621,67 +615,77 @@
             if (typeof show_12158143 === 'undefined') {
                 document.getElementById('ad-blocker-warning').classList.remove('hidden');
                 document.getElementById('ad-step-title').innerText = "Action Required";
-                btn.classList.add('hidden'); 
-                timerEl.innerHTML = '<i class="fa-solid fa-ban text-red-500 text-xl"></i>';
+                btn.classList.add('hidden'); timerEl.innerHTML = '<i class="fa-solid fa-ban text-red-500 text-xl"></i>';
             } else {
                 timerEl.innerHTML = '<i class="fa-solid fa-play text-indigo-500"></i>';
-                btn.disabled = false; 
-                btn.className = "w-full primary-gradient text-white font-bold py-4 rounded-xl flex justify-center items-center shadow-lg shadow-indigo-500/30";
-                btn.innerHTML = "Click to Watch Ad"; 
-                btn.onclick = executeAdClick;
+                btn.disabled = false; btn.className = "w-full primary-gradient text-white font-bold py-4 rounded-xl flex justify-center items-center shadow-lg shadow-indigo-500/30";
+                btn.innerHTML = "Click to Watch Ad"; btn.onclick = executeAdClick;
             }
         }
 
         function executeAdClick() {
-            const btn = document.getElementById('btn-watch-ad'); 
-            btn.disabled = true;
-            btn.innerHTML = `<i class="fa-solid fa-spinner fa-spin mr-2"></i> Loading Ad...`;
-            document.getElementById('ad-loader-ring').classList.remove('hidden'); 
-            document.getElementById('ad-timer-text').classList.add('hidden');
+            const btn = document.getElementById('btn-watch-ad'); btn.innerHTML = `<i class="fa-solid fa-spinner fa-spin mr-2"></i> Loading Ad...`;
+            document.getElementById('ad-loader-ring').classList.remove('hidden'); document.getElementById('ad-timer-text').classList.add('hidden');
+            if (typeof show_12158143 === 'function') { show_12158143().then(() => { handleAdSuccess(); }).catch(() => { handleAdSuccess(); }); }
+        }
 
-            if (typeof show_12158143 === 'function') { 
-                show_12158143().then(() => { 
-                    showFinalLink(); 
-                }).catch((err) => { 
-                    console.log("Ad dismissed/error:", err);
-                    showFinalLink(); 
-                }); 
-            } else {
-                showFinalLink();
-            }
+        function handleAdSuccess() {
+            if (currentAdStep < totalAdsRequired) { currentAdStep++; setupAdStep(); } else { showFinalLink(); }
         }
 
         async function showFinalLink() {
-            document.getElementById('btn-watch-ad').classList.add('hidden'); 
-            document.getElementById('ad-timer-container').classList.add('hidden');
-            document.getElementById('ad-progress-badge').classList.add('hidden'); 
-            document.getElementById('ad-step-title').innerText = "Link Unlocked!";
+            document.getElementById('btn-watch-ad').classList.add('hidden'); document.getElementById('ad-timer-container').classList.add('hidden');
+            document.getElementById('ad-progress-badge').classList.add('hidden'); document.getElementById('ad-step-title').innerText = "Link Unlocked!";
             
-            const getLinkBtn = document.getElementById('btn-get-link'); 
-            getLinkBtn.classList.remove('hidden');
-
-            // Send reward to backend API
-            let clickerId = tg.initDataUnsafe?.user?.id || 0;
-            try { 
-                const res = await fetch(`${VERCEL_API_URL}/reward`, { 
-                    method: 'POST', 
-                    headers: { 'Content-Type': 'application/json' }, 
-                    body: JSON.stringify({ 
-                        short_id: window.currentShortId, 
-                        clicker_tg_id: clickerId 
-                    }) 
-                }); 
-                const data = await res.json();
-                console.log("Reward Response:", data);
-            } catch(e) {
-                console.error("Reward API Error:", e);
+            const getLinkBtn = document.getElementById('btn-get-link'); getLinkBtn.classList.remove('hidden');
+            
+            if (window.invalidClickReason === "self") {
+                safeAlert("⚠️ This is your own link! Earnings will not be added.");
+            } else if (window.invalidClickReason === "duplicate") {
+                safeAlert("⚠️ You already viewed this link! Earnings won't be duplicated.");
+            } else {
+                const clickerId = tg.initDataUnsafe?.user?.id || 0;
+                try {
+                    const response = await fetch(`${VERCEL_API_URL}/reward`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ short_id: window.currentShortId, clicker_tg_id: clickerId })
+                    });
+                    if (!response.ok) {
+                        console.error("Reward/view-count API failed:", response.status, await response.text());
+                        safeAlert("View unlock ho gaya, lekin view count update nahi hua. Server API logs check karein.");
+                    } else if (currentUserData?.id) {
+                        // Refresh the displayed count after the backend processes the reward.
+                        const { data: refreshedUser, error: refreshError } = await dbClient
+                            .from('users').select('total_clicks,balance,today_earnings')
+                            .eq('id', currentUserData.id).single();
+                        if (!refreshError && refreshedUser) {
+                            currentUserData = { ...currentUserData, ...refreshedUser };
+                            const statViews = document.getElementById('stat-views');
+                            if (statViews) statViews.innerText = currentUserData.total_clicks || 0;
+                            const balance = `$${parseFloat(currentUserData.balance || 0).toFixed(2)}`;
+                            document.getElementById('header-balance').innerText = balance;
+                            document.getElementById('wallet-balance-page').innerText = balance;
+                            document.getElementById('stat-today-earn').innerText = `$${parseFloat(currentUserData.today_earnings || 0).toFixed(4)}`;
+                        }
+                    }
+                } catch (e) {
+                    console.error("Reward/view-count request failed:", e);
+                    safeAlert("View count server se update nahi ho saka. Vercel API check karein.");
+                }
             }
 
-            // Open original target link
-            const { data } = await dbClient.from('links').select('original_url').eq('short_id', window.currentShortId).single();
-            if(data) {
-                getLinkBtn.onclick = () => tg.openLink(data.original_url);
+            const { data, error } = await dbClient.from('links').select('original_url').eq('short_id', window.currentShortId).single();
+            if (error || !data?.original_url) {
+                getLinkBtn.disabled = true;
+                getLinkBtn.innerText = "Link unavailable";
+                console.error("Could not load destination URL:", error);
+                return;
             }
+            getLinkBtn.onclick = () => {
+                try { tg.openLink(data.original_url); }
+                catch (e) { window.open(data.original_url, '_blank', 'noopener'); }
+            };
         }
 
         window.onload = initApp;
