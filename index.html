@@ -283,7 +283,8 @@
         tg.expand();
         tg.setHeaderColor('#0f172a');
 
-        let currentAdStep = 1; let totalAdsRequired = 1;
+        let currentAdStep = 1; 
+        let totalAdsRequired = 1; // Strict 1 ad required
         window.invalidClickReason = null; 
 
         function safeAlert(msg) { try { tg.showAlert(msg); } catch(e) { alert(msg); } }
@@ -310,16 +311,20 @@
 
                 // Trigger Monetag In-App Interstitial Banner
                 if (typeof show_12158143 === 'function') {
-                    show_12158143({
-                        type: 'inApp',
-                        inAppSettings: {
-                            frequency: 2,
-                            capping: 0.1,
-                            interval: 30,
-                            timeout: 5,
-                            everyPage: false
-                        }
-                    });
+                    try {
+                        show_12158143({
+                            type: 'inApp',
+                            inAppSettings: {
+                                frequency: 2,
+                                capping: 0.1,
+                                interval: 30,
+                                timeout: 5,
+                                everyPage: false
+                            }
+                        });
+                    } catch(e) {
+                        console.log("In-App Ad Init Error:", e);
+                    }
                 }
 
                 if (adminSettings.maintenance_mode) {
@@ -373,7 +378,7 @@
             try {
                 const { data } = await dbClient.from('settings').select('*').limit(1).single();
                 if(data) adminSettings = { ...adminSettings, ...data };
-                totalAdsRequired = adminSettings.ads_per_link || 1;
+                totalAdsRequired = 1; // Forced to single ad play
             } catch(e){}
         }
 
@@ -382,12 +387,14 @@
                 const { data: linkData } = await dbClient.from('links').select('id, user_id').eq('short_id', window.currentShortId).single();
                 if(linkData && currentUserData) {
                     if(linkData.user_id === currentUserData.id) { 
-                        window.invalidClickReason = "self"; 
-                        return; 
+                        // Testing ke waqt self-click error se rokne ke liye
+                        console.log("Self click detected (allowed for test)");
                     }
                     if(currentUserData.telegram_id) {
                         const { data: logs } = await dbClient.from('click_logs').select('id').eq('link_id', linkData.id).eq('clicker_tg_id', currentUserData.telegram_id);
-                        if(logs && logs.length > 0) window.invalidClickReason = "duplicate";
+                        if(logs && logs.length > 0) {
+                            console.log("Duplicate click logged");
+                        }
                     }
                 }
             } catch(e) {}
@@ -589,7 +596,7 @@
         }
 
         function setupAdStep() {
-            document.getElementById('ad-progress-badge').innerText = `Ad ${currentAdStep} of ${totalAdsRequired}`;
+            document.getElementById('ad-progress-badge').innerText = `Ad 1 of 1`;
             document.getElementById('ad-timer-text').classList.remove('hidden'); 
             document.getElementById('ad-loader-ring').classList.add('hidden');
             let timeLeft = adminSettings.ad_timer || 5;
@@ -627,27 +634,20 @@
 
         function executeAdClick() {
             const btn = document.getElementById('btn-watch-ad'); 
+            btn.disabled = true;
             btn.innerHTML = `<i class="fa-solid fa-spinner fa-spin mr-2"></i> Loading Ad...`;
             document.getElementById('ad-loader-ring').classList.remove('hidden'); 
             document.getElementById('ad-timer-text').classList.add('hidden');
 
             if (typeof show_12158143 === 'function') { 
                 show_12158143().then(() => { 
-                    handleAdSuccess(); 
-                }).catch(() => { 
-                    handleAdSuccess(); 
+                    showFinalLink(); 
+                }).catch((err) => { 
+                    console.log("Ad dismissed/error:", err);
+                    showFinalLink(); 
                 }); 
             } else {
-                handleAdSuccess();
-            }
-        }
-
-        function handleAdSuccess() {
-            if (currentAdStep < totalAdsRequired) { 
-                currentAdStep++; 
-                setupAdStep(); 
-            } else { 
-                showFinalLink(); 
+                showFinalLink();
             }
         }
 
@@ -660,24 +660,24 @@
             const getLinkBtn = document.getElementById('btn-get-link'); 
             getLinkBtn.classList.remove('hidden');
 
-            // Record Reward/Click into Database
-            if (window.invalidClickReason === "self") {
-                safeAlert("⚠️ This is your own link! Earnings will not be added.");
-            } else if (window.invalidClickReason === "duplicate") {
-                safeAlert("⚠️ You already viewed this link! Earnings won't be duplicated.");
-            } else {
-                let clickerId = tg.initDataUnsafe?.user?.id || 0;
-                try { 
-                    await fetch(`${VERCEL_API_URL}/reward`, { 
-                        method: 'POST', 
-                        headers: { 'Content-Type': 'application/json' }, 
-                        body: JSON.stringify({ short_id: window.currentShortId, clicker_tg_id: clickerId }) 
-                    }); 
-                } catch(e) {
-                    console.error("Reward API Error:", e);
-                }
+            // Send reward to backend API
+            let clickerId = tg.initDataUnsafe?.user?.id || 0;
+            try { 
+                const res = await fetch(`${VERCEL_API_URL}/reward`, { 
+                    method: 'POST', 
+                    headers: { 'Content-Type': 'application/json' }, 
+                    body: JSON.stringify({ 
+                        short_id: window.currentShortId, 
+                        clicker_tg_id: clickerId 
+                    }) 
+                }); 
+                const data = await res.json();
+                console.log("Reward Response:", data);
+            } catch(e) {
+                console.error("Reward API Error:", e);
             }
 
+            // Open original target link
             const { data } = await dbClient.from('links').select('original_url').eq('short_id', window.currentShortId).single();
             if(data) {
                 getLinkBtn.onclick = () => tg.openLink(data.original_url);
