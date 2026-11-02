@@ -7,7 +7,7 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
-    <!-- Defer Load to Prevent Android System WebView Crash -->
+    <!-- Monetag Telegram SDK -->
     <script defer src="https://libtl.com/sdk.js" data-zone="12158143" data-sdk="show_12158143"></script>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     
@@ -58,7 +58,7 @@
         </div>
     </div>
 
-    <!-- MAIN APP UI -->
+    <!-- MAIN APP UI (PUBLISHER DASHBOARD) -->
     <div id="ui-main-app" class="hidden">
         <!-- HEADER -->
         <header class="flex items-center justify-between p-4 glass-panel m-4 sticky top-4 z-30">
@@ -249,25 +249,23 @@
         </nav>
     </div>
 
-    <!-- ADVANCED AD VIEWING UI -->
+    <!-- AD VIEWER UI (Link Open Karne Par Direct Ye Khulega - 0% Crash Chance) -->
     <div id="ui-ad-viewer" class="hidden min-h-screen flex flex-col items-center justify-center p-6 z-50">
         <div class="glass-panel w-full max-w-sm p-8 text-center shadow-2xl relative overflow-hidden">
-            <div id="ad-blocker-warning" class="hidden bg-red-900/50 border border-red-500 rounded-lg p-4 mb-4">
-                <i class="fa-solid fa-ban text-3xl text-red-500 mb-2"></i><h3 class="text-red-400 font-bold text-sm mb-1">Ad Blocker Detected!</h3><p class="text-xs text-white">Disable Ad Blocker to unlock.</p>
-            </div>
-            <div id="ad-progress-badge" class="bg-indigo-500/20 text-indigo-300 text-xs font-bold px-3 py-1 rounded-full mb-4 inline-block border border-indigo-500/30">Ad 1 of 1</div>
+            <div id="ad-progress-badge" class="bg-indigo-500/20 text-indigo-300 text-xs font-bold px-3 py-1 rounded-full mb-4 inline-block border border-indigo-500/30">Step 1 of 1</div>
             <div id="ad-timer-container" class="w-24 h-24 mx-auto rounded-full bg-slate-900 border-4 border-slate-700 flex items-center justify-center mb-6 relative shadow-inner">
                 <div class="absolute inset-0 rounded-full border-4 border-transparent ad-timer-circle hidden" id="ad-loader-ring"></div>
                 <span id="ad-timer-text" class="text-3xl font-bold text-white">5</span>
             </div>
-            <h2 class="text-2xl font-bold mb-2 text-white" id="ad-step-title">Please Wait...</h2>
+            <h2 class="text-2xl font-bold mb-2 text-white" id="ad-step-title">Verifying Link...</h2>
+            <p class="text-xs text-slate-400 mb-6" id="ad-step-desc">Please wait while we verify your destination link.</p>
             <button id="btn-watch-ad" disabled class="w-full bg-slate-800 text-slate-500 font-bold py-4 rounded-xl transition-all flex justify-center items-center shadow-lg"><span>Wait for Timer...</span></button>
             <button id="btn-get-link" class="hidden w-full success-gradient text-white font-bold py-4 rounded-xl text-lg shadow-lg shadow-emerald-500/30"><i class="fa-solid fa-arrow-up-right-from-square mr-2"></i> GET LINK</button>
         </div>
     </div>
 
     <script>
-        // --- API CONFIGURATION ---
+        // --- CONFIGURATION ---
         const SUPABASE_URL = 'https://uxyrvqhxtegstxhuvxre.supabase.co'; 
         const SUPABASE_ANON_KEY = 'sb_publishable_iO50h66TI1NByIRI0oH6EQ_pFA7Azct';
         const VERCEL_API_URL = 'https://short2earn-hqlv.vercel.app/api';
@@ -275,31 +273,24 @@
         const BOT_USERNAME = 'SeetuOfficialbot'; 
         const APP_SHORT_NAME = 'Mynexify'; 
 
-        let dbClient = window.supabase.createClient(SUPABASE_URL.replace(/\/rest\/v1\/?$/, "").replace(/\/$/, ""), SUPABASE_ANON_KEY);
+        const dbClient = window.supabase.createClient(SUPABASE_URL.replace(/\/rest\/v1\/?$/, "").replace(/\/$/, ""), SUPABASE_ANON_KEY);
         let currentUserData = null;
         let adminSettings = { cpm: 2, ad_time: 5, ads_per_link: 1, refer_percent: 10, min_withdraw: 5.0, maintenance_mode: false, payment_methods: "UPI" };
-        
-        const tg = window.Telegram?.WebApp;
+        let destinationUrl = null;
 
+        // --- CRASH-PROOF TELEGRAM INIT ---
+        const tg = window.Telegram?.WebApp;
         function initTelegramSafely() {
             if (tg) {
                 try {
                     tg.ready();
-                    if (tg.setHeaderColor) {
-                        tg.setHeaderColor('bg_color'); 
-                    }
-                    if (tg.expand) {
-                        tg.expand();
-                    }
+                    if (tg.setHeaderColor) tg.setHeaderColor('bg_color');
+                    if (tg.expand) tg.expand();
                 } catch(e) {
                     console.warn("TG Init safe warning:", e);
                 }
             }
         }
-
-        let currentAdStep = 1; 
-        let totalAdsRequired = 1; 
-        window.invalidClickReason = null; 
 
         function safeAlert(msg) { try { tg ? tg.showAlert(msg) : alert(msg); } catch(e) { alert(msg); } }
         function copyText(text) {
@@ -329,16 +320,45 @@
                     return;
                 }
 
-                let startParam = tg?.initDataUnsafe?.start_param || new URLSearchParams(window.location.search).get('link');
-                
+                const urlParams = new URLSearchParams(window.location.search);
+                const startParam = tg?.initDataUnsafe?.start_param || urlParams.get('startapp') || urlParams.get('link');
+
+                // --- 1. VIEWER OPENED A SHORT LINK ---
+                // (No Registration! Instant Ad Flow taaki Telegram band na ho)
+                if (startParam && startParam.startsWith('link_')) {
+                    window.currentShortId = startParam.replace('link_', '');
+
+                    const { data: linkData, error: linkErr } = await dbClient.from('links').select('original_url').eq('short_id', window.currentShortId).single();
+                    if (linkErr || !linkData) {
+                        document.getElementById('loading-title').innerText = "Link Expired";
+                        document.getElementById('loading-text').innerText = "This short link does not exist or has been removed.";
+                        return;
+                    }
+                    destinationUrl = linkData.original_url;
+
+                    document.getElementById('ui-loading').classList.add('hidden');
+                    document.getElementById('ui-ad-viewer').classList.remove('hidden');
+                    startAdCountdown();
+                    return;
+                }
+
+                // --- 2. BOT OPENED BY PUBLISHER (REGISTRATION ALLOWED) ---
                 if (tg?.initDataUnsafe?.user) {
                     const user = tg.initDataUnsafe.user;
                     const { data: existUser } = await dbClient.from('users').select('*').eq('telegram_id', user.id).single();
-                    if (existUser && existUser.is_blocked) return document.getElementById('loading-title').innerText = "Account Blocked";
+                    if (existUser && existUser.is_blocked) {
+                        document.getElementById('loading-title').innerText = "Account Blocked";
+                        return;
+                    }
 
                     if (!existUser) {
-                        const { data: newUser } = await dbClient.from('users').insert([{ telegram_id: user.id, first_name: user.first_name, username: user.username }]).select().single();
+                        const { data: newUser } = await dbClient.from('users').insert([{ 
+                            telegram_id: user.id, 
+                            first_name: user.first_name || '', 
+                            username: user.username || '' 
+                        }]).select().single();
                         currentUserData = newUser;
+
                         if (startParam && startParam.startsWith('ref_')) {
                             const referrerId = parseInt(startParam.replace('ref_', ''), 10);
                             if (referrerId && referrerId !== user.id) {
@@ -354,41 +374,27 @@
                     } else {
                         currentUserData = existUser;
                     }
-                } else if (!startParam) { 
-                    return document.getElementById('loading-text').innerText = "Open inside Telegram App."; 
-                }
 
-                if (startParam && startParam.startsWith('link_')) {
-                    window.currentShortId = startParam.replace('link_', '');
-                    await verifyLinkStatus(); 
-                    startAdFlow();
-                } else {
                     document.getElementById('ui-loading').classList.add('hidden');
                     document.getElementById('ui-main-app').classList.remove('hidden');
                     setupDashboard();
+                } else { 
+                    document.getElementById('loading-text').innerText = "Please open inside Telegram App."; 
                 }
-            } catch(e) { document.getElementById('loading-text').innerText = "Error: " + e.message; }
+            } catch(e) { 
+                console.error("Init Error:", e);
+                document.getElementById('loading-text').innerText = "Error: " + e.message; 
+            }
         }
 
         async function loadAdminSettings() {
             try {
                 const { data } = await dbClient.from('settings').select('*').limit(1).single();
                 if(data) adminSettings = { ...adminSettings, ...data };
-                totalAdsRequired = 1;
             } catch(e){}
         }
 
-        async function verifyLinkStatus() {
-            try {
-                const { data: linkData } = await dbClient.from('links').select('id, user_id').eq('short_id', window.currentShortId).single();
-                if(linkData && currentUserData) {
-                    if(linkData.user_id === currentUserData.id) { 
-                        console.log("Self click verified");
-                    }
-                }
-            } catch(e) {}
-        }
-
+        // --- DASHBOARD SETUP ---
         function setupDashboard() {
             document.getElementById('warning-popup').classList.remove('hidden');
             
@@ -577,104 +583,83 @@
             } catch(e) {}
         }
 
-        // AD FLOW LOGIC
-        function startAdFlow() {
-            document.getElementById('ui-loading').classList.add('hidden'); 
-            document.getElementById('ui-ad-viewer').classList.remove('hidden'); 
-            setupAdStep();
-        }
-
-        function setupAdStep() {
-            document.getElementById('ad-progress-badge').innerText = `Ad 1 of 1`;
-            document.getElementById('ad-timer-text').classList.remove('hidden'); 
-            document.getElementById('ad-loader-ring').classList.add('hidden');
-            let timeLeft = adminSettings.ad_timer || 5;
-            const btn = document.getElementById('btn-watch-ad'); 
+        // --- AD VIEWING & UNLOCK LOGIC (CRASH-PROOF) ---
+        function startAdCountdown() {
+            let timer = adminSettings.ad_timer || 5;
             const timerEl = document.getElementById('ad-timer-text');
-            btn.disabled = true; 
-            btn.className = "w-full bg-slate-800 text-slate-500 font-bold py-4 rounded-xl flex justify-center items-center shadow-inner";
-            btn.innerHTML = `Wait ${timeLeft}s...`;
-            
+            const btn = document.getElementById('btn-watch-ad');
+            btn.innerHTML = `Wait ${timer}s...`;
+
             const interval = setInterval(() => {
-                timeLeft--; 
-                timerEl.innerText = timeLeft; 
-                btn.innerHTML = `Wait ${timeLeft}s...`;
-                if (timeLeft <= 0) { 
-                    clearInterval(interval); 
-                    checkAdBlocker(btn, timerEl); 
+                timer--;
+                timerEl.innerText = timer;
+                btn.innerHTML = `Wait ${timer}s...`;
+                if (timer <= 0) {
+                    clearInterval(interval);
+                    timerEl.innerHTML = '<i class="fa-solid fa-play text-indigo-500"></i>';
+                    btn.disabled = false;
+                    btn.className = "w-full primary-gradient text-white font-bold py-4 rounded-xl flex justify-center items-center shadow-lg";
+                    btn.innerHTML = "Click to Unlock Link";
+                    btn.onclick = executeAdStep;
                 }
             }, 1000);
         }
 
-        function checkAdBlocker(btn, timerEl) {
-            timerEl.innerHTML = '<i class="fa-solid fa-play text-indigo-500"></i>';
-            btn.disabled = false; 
-            btn.className = "w-full primary-gradient text-white font-bold py-4 rounded-xl flex justify-center items-center shadow-lg shadow-indigo-500/30";
-            btn.innerHTML = "Click to Watch Ad"; 
-            btn.onclick = executeAdClick;
-        }
-
-        function executeAdClick() {
-            const btn = document.getElementById('btn-watch-ad'); 
+        function executeAdStep() {
+            const btn = document.getElementById('btn-watch-ad');
             btn.disabled = true;
-            btn.innerHTML = `<i class="fa-solid fa-spinner fa-spin mr-2"></i> Loading Ad...`;
-            document.getElementById('ad-loader-ring').classList.remove('hidden'); 
+            btn.innerHTML = `<i class="fa-solid fa-spinner fa-spin mr-2"></i> Playing Ad...`;
+            document.getElementById('ad-loader-ring').classList.remove('hidden');
             document.getElementById('ad-timer-text').classList.add('hidden');
 
             try {
-                if (typeof window.show_12158143 === 'function') { 
-                    window.show_12158143().then(() => { 
-                        showFinalLink(); 
-                    }).catch((err) => { 
+                if (typeof window.show_12158143 === 'function') {
+                    window.show_12158143().then(() => {
+                        completeAdAndUnlock();
+                    }).catch((err) => {
                         console.warn("Monetag dismissed or error:", err);
-                        showFinalLink(); 
-                    }); 
+                        completeAdAndUnlock();
+                    });
                 } else {
-                    showFinalLink();
+                    completeAdAndUnlock();
                 }
-            } catch(e) {
-                console.error("Ad execution catch:", e);
-                showFinalLink();
+            } catch(err) {
+                console.error("Ad exception:", err);
+                completeAdAndUnlock();
             }
         }
 
-        async function showFinalLink() {
-            document.getElementById('btn-watch-ad').classList.add('hidden'); 
+        async function completeAdAndUnlock() {
+            document.getElementById('btn-watch-ad').classList.add('hidden');
             document.getElementById('ad-timer-container').classList.add('hidden');
-            document.getElementById('ad-progress-badge').classList.add('hidden'); 
-            document.getElementById('ad-step-title').innerText = "Link Unlocked!";
-            
-            const getLinkBtn = document.getElementById('btn-get-link'); 
+            document.getElementById('ad-progress-badge').classList.add('hidden');
+            document.getElementById('ad-step-title').innerText = "Link Ready!";
+            document.getElementById('ad-step-desc').innerText = "Click below to open your destination link.";
+
+            const getLinkBtn = document.getElementById('btn-get-link');
             getLinkBtn.classList.remove('hidden');
 
-            // 1. Database me Views aur Earnings record karo (Wait ensure karein)
-            try { 
-                const res = await fetch(`${VERCEL_API_URL}/reward`, { 
-                    method: 'POST', 
-                    headers: { 'Content-Type': 'application/json' }, 
-                    body: JSON.stringify({ short_id: window.currentShortId }) 
-                }); 
-                const data = await res.json();
-                console.log("Reward API Success:", data);
+            // 1. Reward API Hit Karo aur DB update ka wait karo (View count fix)
+            try {
+                const res = await fetch(`${VERCEL_API_URL}/reward`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ short_id: window.currentShortId })
+                });
+                const resData = await res.json();
+                console.log("View count API response:", resData);
             } catch(e) {
                 console.error("Reward API Network Error:", e);
             }
 
-            // 2. Original target link retrieve karke button pe set karo
-            try {
-                const { data } = await dbClient.from('links').select('original_url').eq('short_id', window.currentShortId).single();
-                if(data && data.original_url) {
-                    getLinkBtn.onclick = () => {
-                        if (tg?.openLink) {
-                            tg.openLink(data.original_url);
-                        } else {
-                            window.location.href = data.original_url;
-                        }
-                    };
+            // 2. Button par Destination URL set karo
+            getLinkBtn.onclick = () => {
+                if (tg && tg.openLink && destinationUrl.startsWith('http')) {
+                    tg.openLink(destinationUrl);
+                } else {
+                    window.location.href = destinationUrl;
                 }
-            } catch(e) {
-                console.error("Failed to load original link:", e);
-            }
+            };
         }
 
         window.onload = () => {
