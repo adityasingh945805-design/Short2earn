@@ -1,10 +1,9 @@
 {
-  "name": "teleshort-api",
+  "name": "short2earn-api",
   "version": "1.0.0",
-  "description": "Backend API for TeleShort",
+  "description": "Backend API for Short2Earn",
   "type": "module",
   "dependencies": {
     "@supabase/supabase-js": "^2.39.0"
   }
 }
-
