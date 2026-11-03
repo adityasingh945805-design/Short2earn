@@ -26,7 +26,6 @@
         .fade-in { animation: fadeIn 0.3s ease-in-out; }
         @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
         
-        /* Custom Select Styling */
         select { -webkit-appearance: none; -moz-appearance: none; appearance: none; background: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" fill="%2394a3b8" viewBox="0 0 24 24"><path d="M7 10l5 5 5-5z"/></svg>') no-repeat right 10px center; background-size: 20px; }
     </style>
 </head>
@@ -155,11 +154,10 @@
                 </div>
             </div>
 
-            <!-- PAGE: WALLET & WITHDRAWALS -->
+            <!-- PAGE: WALLET -->
             <div id="page-wallet" class="page-content hidden mx-4 mb-6 fade-in">
                 <h2 class="text-xl font-bold mb-4 text-white"><i class="fa-solid fa-wallet text-emerald-400 mr-2"></i> My Wallet</h2>
                 
-                <!-- Balance Box -->
                 <div class="glass-panel p-8 mb-6 text-center border border-emerald-500/30 bg-gradient-to-br from-emerald-900/20 to-transparent relative overflow-hidden">
                     <i class="fa-solid fa-coins absolute -right-6 -bottom-6 text-8xl text-emerald-500/10"></i>
                     <div class="text-sm text-emerald-200 mb-2 font-medium">Available Balance</div>
@@ -167,14 +165,12 @@
                     <div class="text-xs text-slate-400 mb-6">Minimum Withdrawal: <span id="min-withdraw-display" class="font-bold text-white">$5.00</span></div>
                 </div>
 
-                <!-- Withdrawal Form -->
                 <div class="glass-panel p-6 mb-6 border border-slate-700">
                     <h3 class="font-bold text-sm text-white mb-4 uppercase tracking-wider border-b border-slate-700 pb-2">Request Payout</h3>
                     
                     <div class="mb-4">
                         <label class="block text-xs font-bold text-slate-400 mb-2">Select Payment Method</label>
                         <select id="withdraw-method" class="w-full bg-slate-900 border border-slate-700 text-white rounded-lg p-3 text-sm focus:outline-none focus:border-indigo-500">
-                            <!-- Populated dynamically -->
                             <option value="">Loading methods...</option>
                         </select>
                     </div>
@@ -194,7 +190,6 @@
                     </button>
                 </div>
 
-                <!-- History -->
                 <h3 class="font-bold text-sm text-slate-300 mb-3 px-2"><i class="fa-solid fa-clock-rotate-left mr-2"></i> Payout History</h3>
                 <div id="withdrawal-history-list" class="space-y-3">
                     <div class="glass-panel p-6 text-center text-slate-500 text-xs">No transactions yet.</div>
@@ -208,6 +203,24 @@
                     <div id="profile-avatar" class="w-24 h-24 rounded-full primary-gradient mx-auto mb-4 flex items-center justify-center text-4xl font-bold text-white shadow-xl border-4 border-slate-800 relative z-10">?</div>
                     <h2 id="profile-name" class="text-2xl font-bold text-white relative z-10">User Name</h2>
                     <p id="profile-id" class="text-xs text-indigo-300 font-mono mt-2 bg-indigo-500/20 inline-block px-3 py-1 rounded-full border border-indigo-500/30 relative z-10">ID: ...</p>
+                </div>
+
+                <!-- BOT DEVELOPER API SECTION -->
+                <div class="glass-panel p-5 mb-4 border border-indigo-500/30 shadow-lg">
+                    <h3 class="text-xs font-bold text-indigo-400 mb-2 uppercase tracking-wider flex items-center">
+                        <i class="fa-solid fa-robot mr-2"></i> Telegram Bot API Integration
+                    </h3>
+                    <p class="text-[11px] text-slate-300 mb-3">Connect your Telegram Shortener Bot using your personal API key:</p>
+                    
+                    <div class="bg-slate-900 rounded-lg p-2.5 flex items-center justify-between border border-slate-700 mb-3">
+                        <span id="user-api-token" class="text-xs font-mono text-emerald-400 truncate w-[75%]">Loading API Key...</span>
+                        <button onclick="copyText(document.getElementById('user-api-token').innerText)" class="bg-slate-800 px-3 py-1.5 rounded text-xs font-bold text-slate-300 hover:text-white">Copy</button>
+                    </div>
+
+                    <div class="bg-slate-950/60 p-3 rounded-lg border border-slate-800 text-[10px] text-slate-400 font-mono overflow-x-auto">
+                        <span class="text-amber-400">Endpoint:</span> <br>
+                        <code>https://short2earn-hqlv.vercel.app/api/shorten?api=YOUR_KEY&url=YOUR_LONG_URL</code>
+                    </div>
                 </div>
 
                 <div class="glass-panel p-2 mb-4 shadow-lg">
@@ -266,31 +279,29 @@
                 <span id="ad-timer-text" class="text-3xl font-bold text-white">5</span>
             </div>
             <h2 class="text-2xl font-bold mb-2 text-white" id="ad-step-title">Please Wait...</h2>
-            <button id="btn-watch-ad" disabled class="w-full bg-slate-800 text-slate-500 font-bold py-4 rounded-xl transition-all flex justify-center items-center shadow-lg"><span>Wait for Timer...</span></button>
+            <button id="btn-watch-ad" disabled class="w-full bg-slate-800 text-slate-500 font-bold py-4 rounded-xl flex justify-center items-center shadow-lg"><span>Wait for Timer...</span></button>
             <button id="btn-get-link" class="hidden w-full success-gradient text-white font-bold py-4 rounded-xl text-lg shadow-lg shadow-emerald-500/30"><i class="fa-solid fa-arrow-up-right-from-square mr-2"></i> GET LINK</button>
         </div>
     </div>
 
     <script>
-        // --- API CONFIGURATION ---
         const SUPABASE_URL = 'https://uxyrvqhxtegstxhuvxre.supabase.co'; 
         const SUPABASE_ANON_KEY = 'sb_publishable_iO50h66TI1NByIRI0oH6EQ_pFA7Azct';
         const VERCEL_API_URL = 'https://short2earn-hqlv.vercel.app/api';
-    
         
         const BOT_USERNAME = 'SeetuOfficialbot'; 
         const APP_SHORT_NAME = 'Mynexify'; 
 
-        // Auto-cleans URL if pasted with /rest/v1/ suffix
         let dbClient = window.supabase.createClient(SUPABASE_URL.replace(/\/rest\/v1\/?$/, "").replace(/\/$/, ""), SUPABASE_ANON_KEY);
         let currentUserData = null;
-        let adminSettings = { cpm: 2, ad_time: 5, ads_per_link: 1, refer_percent: 10, min_withdraw: 5.0, maintenance_mode: false, payment_methods: "UPI" };
+        let adminSettings = { cpm: 2, ad_timer: 5, ads_per_link: 1, refer_percent: 10, min_withdraw: 5.0, maintenance_mode: false, payment_methods: "UPI" };
         
         const tg = window.Telegram.WebApp;
         tg.expand();
         tg.setHeaderColor('#0f172a');
 
-        let currentAdStep = 1; let totalAdsRequired = 1;
+        let currentAdStep = 1; 
+        let totalAdsRequired = 1;
         window.invalidClickReason = null; 
 
         function safeAlert(msg) { try { tg.showAlert(msg); } catch(e) { alert(msg); } }
@@ -315,22 +326,30 @@
             try {
                 await loadAdminSettings();
 
-                // Check Maintenance Mode
                 if (adminSettings.maintenance_mode) {
                     document.getElementById('ui-loading').classList.add('hidden');
                     document.getElementById('ui-maintenance').classList.remove('hidden');
-                    return; // Stop app execution
+                    return;
                 }
 
                 let startParam = tg.initDataUnsafe?.start_param || new URLSearchParams(window.location.search).get('link');
                 
                 if (tg.initDataUnsafe?.user) {
                     const user = tg.initDataUnsafe.user;
-                    const { data: existUser } = await dbClient.from('users').select('*').eq('telegram_id', user.id).single();
+                    let { data: existUser } = await dbClient.from('users').select('*').eq('telegram_id', user.id).maybeSingle();
                     if (existUser && existUser.is_blocked) return document.getElementById('loading-title').innerText = "Account Blocked";
 
+                    // Ensure user has api_token
                     if (!existUser) {
-                        await dbClient.from('users').insert([{ telegram_id: user.id, first_name: user.first_name, username: user.username }]);
+                        const randomToken = Math.random().toString(36).substring(2) + Math.random().toString(36).substring(2);
+                        const { data: newUser } = await dbClient.from('users').insert([{ 
+                            telegram_id: user.id, 
+                            first_name: user.first_name, 
+                            username: user.username,
+                            api_token: randomToken 
+                        }]).select().single();
+                        existUser = newUser;
+
                         if (startParam && startParam.startsWith('ref_')) {
                             const referrerId = parseInt(startParam.replace('ref_', ''), 10);
                             if (referrerId && referrerId !== user.id) {
@@ -343,9 +362,14 @@
                                 } catch(e) {}
                             }
                         }
+                    } else if (!existUser.api_token) {
+                        const randomToken = Math.random().toString(36).substring(2) + Math.random().toString(36).substring(2);
+                        await dbClient.from('users').update({ api_token: randomToken }).eq('id', existUser.id);
+                        existUser.api_token = randomToken;
                     }
-                    currentUserData = existUser || { telegram_id: user.id, balance: 0, today_earnings: 0, total_clicks: 0, id: null };
-                } else if (!startParam) { return document.getElementById('loading-text').innerText = "Open inside Telegram App."; }
+
+                    currentUserData = existUser;
+                }
 
                 if (startParam && startParam.startsWith('link_')) {
                     window.currentShortId = startParam.replace('link_', '');
@@ -356,11 +380,13 @@
                     document.getElementById('ui-main-app').classList.remove('hidden');
                     setupDashboard();
                 }
-            } catch(e) { document.getElementById('loading-text').innerText = "Error: " + e.message; }
+            } catch(e) { 
+                document.getElementById('loading-text').innerText = "Error: " + e.message; 
+            }
         }
 
         async function loadAdminSettings() {
-            const { data } = await dbClient.from('settings').select('*').limit(1).single();
+            const { data } = await dbClient.from('settings').select('*').limit(1).maybeSingle();
             if(data) adminSettings = { ...adminSettings, ...data };
             totalAdsRequired = adminSettings.ads_per_link || 1;
         }
@@ -369,7 +395,10 @@
             try {
                 const { data: linkData } = await dbClient.from('links').select('id, user_id').eq('short_id', window.currentShortId).single();
                 if(linkData && currentUserData) {
-                    if(linkData.user_id === currentUserData.id) { window.invalidClickReason = "self"; return; }
+                    if(linkData.user_id === currentUserData.id) { 
+                        window.invalidClickReason = "self"; 
+                        return; 
+                    }
                     if(currentUserData.telegram_id) {
                         const { data: logs } = await dbClient.from('click_logs').select('id').eq('link_id', linkData.id).eq('clicker_tg_id', currentUserData.telegram_id);
                         if(logs && logs.length > 0) window.invalidClickReason = "duplicate";
@@ -379,10 +408,8 @@
         }
 
         function setupDashboard() {
-            // Popup
             document.getElementById('warning-popup').classList.remove('hidden');
             
-            // Header Info
             const u = tg.initDataUnsafe?.user;
             if(u) {
                 document.getElementById('user-greeting').innerText = `Hello, ${u.first_name}!`;
@@ -392,22 +419,23 @@
                 document.getElementById('referral-link-display').innerText = `https://t.me/${BOT_USERNAME}/${APP_SHORT_NAME}?startapp=ref_${u.id}`;
             }
 
-            // Stats
-            document.getElementById('header-balance').innerText = `$${parseFloat(currentUserData.balance || 0).toFixed(2)}`;
-            document.getElementById('wallet-balance-page').innerText = `$${parseFloat(currentUserData.balance || 0).toFixed(2)}`;
-            document.getElementById('stat-today-earn').innerText = `$${parseFloat(currentUserData.today_earnings || 0).toFixed(4)}`;
-            document.getElementById('stat-views').innerText = currentUserData.total_clicks || 0;
+            if(currentUserData?.api_token) {
+                document.getElementById('user-api-token').innerText = currentUserData.api_token;
+            }
+
+            document.getElementById('header-balance').innerText = `$${parseFloat(currentUserData?.balance || 0).toFixed(2)}`;
+            document.getElementById('wallet-balance-page').innerText = `$${parseFloat(currentUserData?.balance || 0).toFixed(2)}`;
+            document.getElementById('stat-today-earn').innerText = `$${parseFloat(currentUserData?.today_earnings || 0).toFixed(4)}`;
+            document.getElementById('stat-views').innerText = currentUserData?.total_clicks || 0;
             document.getElementById('stat-cpm').innerText = `$${parseFloat(adminSettings.cpm || 0).toFixed(2)}`;
             document.getElementById('refer-commission').innerText = `${adminSettings.refer_percent || 10}%`;
             document.getElementById('min-withdraw-display').innerText = `$${parseFloat(adminSettings.min_withdraw || 5).toFixed(2)}`;
 
-            // Profile Links
             if(adminSettings.tg_channel_url) { document.getElementById('link-tg').href = adminSettings.tg_channel_url; document.getElementById('link-tg').classList.remove('hidden'); document.getElementById('link-tg').classList.add('flex'); }
             if(adminSettings.yt_channel_url) { document.getElementById('link-yt').href = adminSettings.yt_channel_url; document.getElementById('link-yt').classList.remove('hidden'); document.getElementById('link-yt').classList.add('flex'); if(adminSettings.tg_channel_url) document.getElementById('div-line-yt').classList.remove('hidden'); }
             if(adminSettings.privacy_url) { document.getElementById('link-privacy').href = adminSettings.privacy_url; document.getElementById('link-privacy').classList.remove('hidden'); document.getElementById('link-privacy').classList.add('flex'); }
             if(adminSettings.terms_url) { document.getElementById('link-terms').href = adminSettings.terms_url; document.getElementById('link-terms').classList.remove('hidden'); document.getElementById('link-terms').classList.add('flex'); }
 
-            // Withdraw Select Methods
             const methods = (adminSettings.payment_methods || "UPI").split(',');
             const sel = document.getElementById('withdraw-method');
             sel.innerHTML = '<option value="">Choose Method...</option>';
@@ -417,7 +445,6 @@
                 sel.appendChild(opt);
             });
 
-            // Listeners
             document.querySelectorAll('.nav-btn').forEach(btn => btn.addEventListener('click', function() { switchPage(this.getAttribute('data-target')); }));
             
             document.getElementById('btn-shorten').addEventListener('click', async function() {
@@ -426,7 +453,7 @@
                 this.innerHTML = '<i class="fa-solid fa-circle-notch fa-spin"></i>'; this.disabled = true;
                 try {
                     const shortId = Math.random().toString(36).substring(2, 8);
-                    await dbClient.from('links').insert([{ original_url: url, short_id: shortId, user_id: currentUserData.id }]);
+                    await dbClient.from('links').insert([{ original_url: url, short_id: shortId, user_id: currentUserData.id, clicks: 0, earnings: 0 }]);
                     document.getElementById('short-link-display').innerText = `https://t.me/${BOT_USERNAME}/${APP_SHORT_NAME}?startapp=link_${shortId}`;
                     document.getElementById('shorten-result').classList.remove('hidden');
                     document.getElementById('long-url-input').value = '';
@@ -442,7 +469,6 @@
             generateDateReport(); fetchReferralDetails();
         }
 
-        // --- WITHDRAWAL LOGIC ---
         window.submitWithdrawal = async function() {
             const method = document.getElementById('withdraw-method').value;
             const details = document.getElementById('withdraw-details').value.trim();
@@ -460,16 +486,14 @@
 
             try {
                 const newBal = bal - amount;
-                // 1. Deduct Balance
                 await dbClient.from('users').update({ balance: newBal }).eq('id', currentUserData.id);
-                // 2. Insert Request
                 await dbClient.from('withdrawals').insert([{
                     user_id: currentUserData.id,
                     username: tg.initDataUnsafe?.user?.username || tg.initDataUnsafe?.user?.first_name || 'User',
                     amount: amount, method: method, details: details, status: 'pending'
                 }]);
 
-                currentUserData.balance = newBal; // Update local
+                currentUserData.balance = newBal;
                 document.getElementById('header-balance').innerText = `$${newBal.toFixed(2)}`;
                 document.getElementById('wallet-balance-page').innerText = `$${newBal.toFixed(2)}`;
                 document.getElementById('withdraw-amount').value = '';
@@ -509,7 +533,6 @@
             } catch(e) {}
         }
 
-        // --- FETCH LINKS & REPORT ---
         async function loadLinks() {
             const list = document.getElementById('links-list');
             try {
@@ -524,7 +547,7 @@
         }
 
         async function fetchReferralDetails() {
-            if(!currentUserData.telegram_id) return;
+            if(!currentUserData?.telegram_id) return;
             const listContainer = document.getElementById('referrals-list');
             try {
                 const { data: refs } = await dbClient.from('referrals').select('*').eq('referrer_tg_id', currentUserData.telegram_id).order('created_at', { ascending: false });
@@ -548,7 +571,7 @@
         async function generateDateReport() {
             const listDiv = document.getElementById('earnings-list');
             const monthStr = document.getElementById('report-month').value;
-            if(!monthStr || !currentUserData.id) return;
+            if(!monthStr || !currentUserData?.id) return;
             listDiv.innerHTML = '<div class="text-center text-slate-500 py-4"><i class="fa-solid fa-circle-notch fa-spin"></i> Fetching...</div>';
 
             const [year, month] = monthStr.split('-');
@@ -566,7 +589,8 @@
                 let dailyData = {};
                 clicks.forEach(c => {
                     const dateStr = new Date(c.created_at).toLocaleDateString();
-                    if(!dailyData[dateStr]) dailyData[dateStr] = 0; dailyData[dateStr] += (adminSettings.cpm / 1000);
+                    if(!dailyData[dateStr]) dailyData[dateStr] = 0; 
+                    dailyData[dateStr] += (adminSettings.cpm / 1000);
                 });
 
                 listDiv.innerHTML = '';
@@ -576,22 +600,31 @@
             } catch(e) {}
         }
 
-        // AD FLOW LOGIC
         function startAdFlow() {
-            document.getElementById('ui-loading').classList.add('hidden'); document.getElementById('ui-ad-viewer').classList.remove('hidden'); setupAdStep();
+            document.getElementById('ui-loading').classList.add('hidden'); 
+            document.getElementById('ui-ad-viewer').classList.remove('hidden'); 
+            setupAdStep();
         }
 
         function setupAdStep() {
             document.getElementById('ad-progress-badge').innerText = `Ad ${currentAdStep} of ${totalAdsRequired}`;
-            document.getElementById('ad-timer-text').classList.remove('hidden'); document.getElementById('ad-loader-ring').classList.add('hidden');
+            document.getElementById('ad-timer-text').classList.remove('hidden'); 
+            document.getElementById('ad-loader-ring').classList.add('hidden');
             let timeLeft = adminSettings.ad_timer || 5;
-            const btn = document.getElementById('btn-watch-ad'); const timerEl = document.getElementById('ad-timer-text');
-            btn.disabled = true; btn.className = "w-full bg-slate-800 text-slate-500 font-bold py-4 rounded-xl flex justify-center items-center shadow-inner";
+            const btn = document.getElementById('btn-watch-ad'); 
+            const timerEl = document.getElementById('ad-timer-text');
+            btn.disabled = true; 
+            btn.className = "w-full bg-slate-800 text-slate-500 font-bold py-4 rounded-xl flex justify-center items-center shadow-inner";
             btn.innerHTML = `Wait ${timeLeft}s...`;
             
             const interval = setInterval(() => {
-                timeLeft--; timerEl.innerText = timeLeft; btn.innerHTML = `Wait ${timeLeft}s...`;
-                if (timeLeft <= 0) { clearInterval(interval); checkAdBlocker(btn, timerEl); }
+                timeLeft--; 
+                timerEl.innerText = timeLeft; 
+                btn.innerHTML = `Wait ${timeLeft}s...`;
+                if (timeLeft <= 0) { 
+                    clearInterval(interval); 
+                    checkAdBlocker(btn, timerEl); 
+                }
             }, 1000);
         }
 
@@ -599,41 +632,76 @@
             if (typeof show_12158143 === 'undefined') {
                 document.getElementById('ad-blocker-warning').classList.remove('hidden');
                 document.getElementById('ad-step-title').innerText = "Action Required";
-                btn.classList.add('hidden'); timerEl.innerHTML = '<i class="fa-solid fa-ban text-red-500 text-xl"></i>';
+                btn.classList.add('hidden'); 
+                timerEl.innerHTML = '<i class="fa-solid fa-ban text-red-500 text-xl"></i>';
             } else {
                 timerEl.innerHTML = '<i class="fa-solid fa-play text-indigo-500"></i>';
-                btn.disabled = false; btn.className = "w-full primary-gradient text-white font-bold py-4 rounded-xl flex justify-center items-center shadow-lg shadow-indigo-500/30";
-                btn.innerHTML = "Click to Watch Ad"; btn.onclick = executeAdClick;
+                btn.disabled = false; 
+                btn.className = "w-full primary-gradient text-white font-bold py-4 rounded-xl flex justify-center items-center shadow-lg shadow-indigo-500/30";
+                btn.innerHTML = "Click to Watch Ad"; 
+                btn.onclick = executeAdClick;
             }
         }
 
         function executeAdClick() {
-            const btn = document.getElementById('btn-watch-ad'); btn.innerHTML = `<i class="fa-solid fa-spinner fa-spin mr-2"></i> Loading Ad...`;
-            document.getElementById('ad-loader-ring').classList.remove('hidden'); document.getElementById('ad-timer-text').classList.add('hidden');
-            if (typeof show_12158143 === 'function') { show_12158143().then(() => { handleAdSuccess(); }).catch(() => { handleAdSuccess(); }); }
+            const btn = document.getElementById('btn-watch-ad'); 
+            btn.innerHTML = `<i class="fa-solid fa-spinner fa-spin mr-2"></i> Loading Ad...`;
+            document.getElementById('ad-loader-ring').classList.remove('hidden'); 
+            document.getElementById('ad-timer-text').classList.add('hidden');
+            if (typeof show_12158143 === 'function') { 
+                show_12158143().then(() => { handleAdSuccess(); }).catch(() => { handleAdSuccess(); }); 
+            } else {
+                handleAdSuccess();
+            }
         }
 
         function handleAdSuccess() {
-            if (currentAdStep < totalAdsRequired) { currentAdStep++; setupAdStep(); } else { showFinalLink(); }
+            if (currentAdStep < totalAdsRequired) { 
+                currentAdStep++; 
+                setupAdStep(); 
+            } else { 
+                showFinalLink(); 
+            }
         }
 
         async function showFinalLink() {
-            document.getElementById('btn-watch-ad').classList.add('hidden'); document.getElementById('ad-timer-container').classList.add('hidden');
-            document.getElementById('ad-progress-badge').classList.add('hidden'); document.getElementById('ad-step-title').innerText = "Link Unlocked!";
+            document.getElementById('btn-watch-ad').classList.add('hidden'); 
+            document.getElementById('ad-timer-container').classList.add('hidden');
+            document.getElementById('ad-progress-badge').classList.add('hidden'); 
+            document.getElementById('ad-step-title').innerText = "Link Unlocked!";
             
-            const getLinkBtn = document.getElementById('btn-get-link'); getLinkBtn.classList.remove('hidden');
+            const getLinkBtn = document.getElementById('btn-get-link'); 
+            getLinkBtn.classList.remove('hidden');
             
+            // Views count API call
             if (window.invalidClickReason === "self") {
-                safeAlert("⚠️ This is your own link! Earnings will not be added.");
+                safeAlert("⚠️ This is your own link! Earnings and views will not be added.");
             } else if (window.invalidClickReason === "duplicate") {
-                safeAlert("⚠️ You already viewed this link! Earnings won't be duplicated.");
+                safeAlert("⚠️ You already viewed this link! Views and earnings won't be counted again.");
             } else {
                 let clickerId = tg.initDataUnsafe?.user?.id || 0;
-                try { fetch(`${VERCEL_API_URL}/reward`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ short_id: window.currentShortId, clicker_tg_id: clickerId }) }); } catch(e){}
+                try { 
+                    await fetch(`${VERCEL_API_URL}/reward`, { 
+                        method: 'POST', 
+                        headers: { 'Content-Type': 'application/json' }, 
+                        body: JSON.stringify({ 
+                            short_id: window.currentShortId, 
+                            clicker_tg_id: clickerId 
+                        }) 
+                    }); 
+                } catch(e) {
+                    console.error("Reward API Failed:", e);
+                }
             }
 
-            const { data } = await dbClient.from('links').select('original_url').eq('short_id', window.currentShortId).single();
-            if(data) getLinkBtn.onclick = () => tg.openLink(data.original_url);
+            try {
+                const { data } = await dbClient.from('links').select('original_url').eq('short_id', window.currentShortId).single();
+                if(data && data.original_url) {
+                    getLinkBtn.onclick = () => tg.openLink(data.original_url);
+                }
+            } catch(e) {
+                console.error("Error fetching original URL:", e);
+            }
         }
 
         window.onload = initApp;
