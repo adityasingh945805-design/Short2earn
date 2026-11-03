@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>TeleShort - Advanced Admin Panel</title>
+    <title>Short2Earn - Advanced Admin Panel</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
@@ -25,7 +25,7 @@
             <div class="w-16 h-16 mx-auto bg-indigo-500/20 rounded-xl flex items-center justify-center mb-6">
                 <i class="fa-solid fa-shield-halved text-3xl text-indigo-500"></i>
             </div>
-            <h2 class="text-2xl font-bold mb-6">Admin Secure Login</h2>
+            <h2 class="text-2xl font-bold mb-6">Short2Earn Admin Login</h2>
             <input type="password" id="admin-password" placeholder="Enter Password" class="w-full bg-slate-900 border border-slate-700 text-white px-4 py-3 rounded-lg mb-4 focus:outline-none focus:border-indigo-500 text-center tracking-widest">
             <button id="btn-login" class="w-full bg-indigo-600 hover:bg-indigo-500 text-white font-bold py-3 rounded-lg transition-all shadow-lg">Login</button>
         </div>
@@ -35,7 +35,7 @@
     <div id="admin-dashboard" class="flex w-full h-full hidden">
         <!-- Desktop Sidebar -->
         <aside class="w-64 bg-slate-900 border-r border-slate-800 p-4 hidden md:flex flex-col">
-            <h1 class="text-xl font-bold text-indigo-500 mb-8 px-2"><i class="fa-solid fa-bolt mr-2"></i>TeleAdmin</h1>
+            <h1 class="text-xl font-bold text-indigo-500 mb-8 px-2"><i class="fa-solid fa-bolt mr-2"></i>Short2Earn</h1>
             <nav class="space-y-2 flex-1">
                 <button class="nav-btn w-full text-left p-3 rounded bg-indigo-600 text-white transition" onclick="switchTab('dashboard', this)"><i class="fa-solid fa-chart-pie mr-2 w-5 text-center"></i> Dashboard</button>
                 <button class="nav-btn w-full text-left p-3 rounded hover:bg-slate-800 text-slate-400 transition" onclick="switchTab('users', this)"><i class="fa-solid fa-users mr-2 w-5 text-center"></i> Users List</button>
@@ -49,7 +49,7 @@
         <!-- Mobile Header & Main -->
         <div class="md:hidden flex flex-col w-full h-full">
             <header class="flex justify-between items-center bg-slate-900 p-4 border-b border-slate-800">
-                <span class="font-bold text-indigo-400"><i class="fa-solid fa-bolt mr-2"></i>TeleAdmin</span>
+                <span class="font-bold text-indigo-400"><i class="fa-solid fa-bolt mr-2"></i>Short2Earn</span>
                 <div class="flex space-x-2 text-sm overflow-x-auto whitespace-nowrap pb-1">
                     <button class="nav-btn bg-indigo-600 px-3 py-1 rounded text-white" onclick="switchTab('dashboard', this)">Dash</button>
                     <button class="nav-btn text-slate-400 px-3 py-1" onclick="switchTab('users', this)">Users</button>
@@ -213,7 +213,7 @@
                 <div class="bg-[#0e1621] p-4 rounded-xl border border-slate-700 max-w-sm mx-auto shadow-2xl relative">
                     <div class="flex items-center space-x-3 mb-4 pb-3 border-b border-slate-800">
                         <div class="w-10 h-10 rounded-full bg-indigo-600 flex items-center justify-center text-white"><i class="fa-solid fa-robot"></i></div>
-                        <div><div class="text-white font-bold text-sm">TeleShortLink Bot <i class="fa-solid fa-circle-check text-blue-400 text-xs"></i></div><div class="text-slate-400 text-[10px]">bot</div></div>
+                        <div><div class="text-white font-bold text-sm">Short2Earn Bot <i class="fa-solid fa-circle-check text-blue-400 text-xs"></i></div><div class="text-slate-400 text-[10px]">bot</div></div>
                     </div>
                     <div class="tg-bubble p-2 inline-block max-w-[95%]">
                         <img id="prev-img" src="" class="hidden w-full rounded-lg mb-2 object-cover max-h-48">
