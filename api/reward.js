@@ -1,6 +1,7 @@
 import { createClient } from '@supabase/supabase-js';
 
 export default async function handler(req, res) {
+    // 1. CORS headers set karein
     res.setHeader('Access-Control-Allow-Credentials', 'true');
     res.setHeader('Access-Control-Allow-Origin', '*');
     res.setHeader('Access-Control-Allow-Methods', 'GET,OPTIONS,PATCH,DELETE,POST,PUT');
@@ -35,7 +36,7 @@ export default async function handler(req, res) {
     try {
         const supabase = createClient(cleanUrl, supabaseKey.trim());
 
-        // 1. Fetch Link Data
+        // 2. Short link fetch karein
         const { data: linkData, error: linkErr } = await supabase
             .from('links')
             .select('*')
@@ -46,7 +47,7 @@ export default async function handler(req, res) {
             return res.status(404).json({ error: 'Link not found' });
         }
 
-        // 2. Fetch Admin Settings
+        // 3. Admin settings fetch karein
         const { data: adminSettings } = await supabase
             .from('settings')
             .select('*')
@@ -56,7 +57,7 @@ export default async function handler(req, res) {
         const cpm = adminSettings && adminSettings.cpm ? parseFloat(adminSettings.cpm) : 2.0;
         const earn_amount = Number((cpm / 1000).toFixed(6));
 
-        // 3. Update LINK table (Increment views count & earnings)
+        // 4. Link clicks aur earnings increment karein
         const newClicks = (Number(linkData.clicks) || 0) + 1;
         const newLinkEarnings = (parseFloat(linkData.earnings) || 0) + earn_amount;
 
@@ -65,7 +66,7 @@ export default async function handler(req, res) {
             earnings: newLinkEarnings
         }).eq('id', linkData.id);
 
-        // 4. Record into click_logs table for Admin Stats & Unique Tracking
+        // 5. Click logs table me entry dalein (Admin & analytics ke liye)
         if (clicker_tg_id) {
             await supabase.from('click_logs').insert([{
                 link_id: linkData.id,
@@ -73,7 +74,7 @@ export default async function handler(req, res) {
             }]);
         }
 
-        // 5. Fetch & Update LINK OWNER User Record
+        // 6. Link owner (User) ka balance aur views update karein
         const { data: userData } = await supabase
             .from('users')
             .select('*')
@@ -91,7 +92,7 @@ export default async function handler(req, res) {
                 total_clicks: newTotalClicks
             }).eq('id', userData.id);
 
-            // 6. Referral Commission
+            // 7. Referral commission credit karein
             const referPercent = adminSettings && adminSettings.refer_percent ? parseFloat(adminSettings.refer_percent) : 10;
             if (referPercent > 0 && userData.telegram_id) {
                 try {
@@ -123,7 +124,7 @@ export default async function handler(req, res) {
 
         return res.status(200).json({ 
             success: true, 
-            message: 'View and reward credited successfully',
+            message: 'Views and earnings updated successfully',
             views: newClicks 
         });
 
