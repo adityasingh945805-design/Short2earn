@@ -293,7 +293,7 @@
         
         const BOT_USERNAME = 'SeetuOfficialbot'; 
         const APP_SHORT_NAME = 'Mynexify'; 
-        const ADSGRAM_BLOCK_ID = '57900'; // Aapka Block ID
+        const ADSGRAM_BLOCK_ID = '57902'; // Aapka Naya Adsgram Ad Unit ID
 
         let dbClient = window.supabase.createClient(SUPABASE_URL.replace(/\/rest\/v1\/?$/, "").replace(/\/$/, ""), SUPABASE_ANON_KEY);
         let currentUserData = null;
@@ -303,12 +303,12 @@
         tg.expand();
         tg.setHeaderColor('#0f172a');
 
-        // Adsgram Init
+        // Adsgram Controller Initialize
         let AdController = null;
         if (window.Adsgram) {
             AdController = window.Adsgram.init({ 
                 blockId: ADSGRAM_BLOCK_ID,
-                debug: true 
+                debug: true // Test mode on hai
             });
         }
 
