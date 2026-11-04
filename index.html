@@ -1,4 +1,240 @@
-sm text-slate-200 ml-2">YouTube Channel</span></div>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Short2Earn - Mini App</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <script src='//libtl.com/sdk.js' data-zone='12158143' data-sdk='show_12158143'></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap');
+        body { font-family: 'Poppins', sans-serif; background: #0f172a; color: #f8fafc; padding-bottom: 80px; min-height: 100vh; overflow-x: hidden; -webkit-tap-highlight-color: transparent;}
+        .glass-panel { background: rgba(30, 41, 59, 0.7); backdrop-filter: blur(12px); border: 1px solid rgba(255, 255, 255, 0.08); border-radius: 1.25rem; box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1); }
+        .primary-gradient { background: linear-gradient(135deg, #6366f1 0%, #3b82f6 100%); }
+        .success-gradient { background: linear-gradient(135deg, #10b981 0%, #059669 100%); }
+        .nav-item { color: #64748b; transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); }
+        .nav-item.active { color: #60a5fa; transform: translateY(-4px); }
+        .nav-item.active .nav-icon { background: rgba(96, 165, 250, 0.15); color: #60a5fa; box-shadow: 0 0 15px rgba(96, 165, 250, 0.2); }
+        .ad-timer-circle { border-top-color: #3b82f6; animation: spin 1s linear infinite; }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+        ::-webkit-scrollbar { width: 4px; }
+        ::-webkit-scrollbar-thumb { background: #475569; border-radius: 10px; }
+        .fade-in { animation: fadeIn 0.3s ease-in-out; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        
+        select { -webkit-appearance: none; -moz-appearance: none; appearance: none; background: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" fill="%2394a3b8" viewBox="0 0 24 24"><path d="M7 10l5 5 5-5z"/></svg>') no-repeat right 10px center; background-size: 20px; }
+    </style>
+</head>
+<body>
+
+    <!-- LOADING SCREEN -->
+    <div id="ui-loading" class="fixed inset-0 flex flex-col items-center justify-center bg-[#0f172a] z-50">
+        <i class="fa-solid fa-bolt text-5xl text-indigo-500 mb-4 animate-pulse"></i>
+        <h2 class="text-2xl font-bold text-white mb-2" id="loading-title">Short2Earn</h2>
+        <p class="text-slate-400 text-sm" id="loading-text">Connecting to servers...</p>
+    </div>
+
+    <!-- MAINTENANCE SCREEN -->
+    <div id="ui-maintenance" class="fixed inset-0 flex flex-col items-center justify-center bg-[#0f172a] z-50 hidden fade-in">
+        <div class="glass-panel p-8 max-w-sm text-center border border-amber-500/30">
+            <div class="w-20 h-20 bg-amber-500/20 rounded-full mx-auto flex items-center justify-center mb-6"><i class="fa-solid fa-person-digging text-4xl text-amber-500"></i></div>
+            <h2 class="text-2xl font-bold text-white mb-2">Under Maintenance</h2>
+            <p class="text-sm text-slate-300 mb-6">We are currently upgrading our servers to serve you better. Please check back later!</p>
+            <button onclick="tg.close()" class="w-full bg-slate-800 text-white font-bold py-3 rounded-xl transition-all hover:bg-slate-700">Close App</button>
+        </div>
+    </div>
+
+    <!-- WARNING POPUP -->
+    <div id="warning-popup" class="fixed inset-0 z-[60] bg-[#0f172a]/90 backdrop-blur-sm flex items-center justify-center hidden fade-in">
+        <div class="glass-panel p-6 m-4 max-w-sm text-center border border-red-500/50 shadow-2xl shadow-red-500/20">
+            <div class="w-16 h-16 bg-red-500/20 rounded-full mx-auto flex items-center justify-center mb-4"><i class="fa-solid fa-triangle-exclamation text-3xl text-red-500"></i></div>
+            <h2 class="text-xl font-bold text-white mb-2">Important Rules!</h2>
+            <p class="text-sm text-slate-300 mb-6"><span class="text-red-400 font-bold">1.</span> NO VPN Allowed.<br><span class="text-red-400 font-bold">2.</span> NO Self-Clicking.<br><br>Violations will result in an instant <span class="font-bold text-red-400">Account BAN</span> without payout.</p>
+            <button onclick="document.getElementById('warning-popup').classList.add('hidden')" class="w-full bg-red-600 hover:bg-red-500 text-white font-bold py-3 rounded-xl transition-all">I Agree</button>
+        </div>
+    </div>
+
+    <!-- MAIN APP UI -->
+    <div id="ui-main-app" class="hidden">
+        <!-- HEADER -->
+        <header class="flex items-center justify-between p-4 glass-panel m-4 sticky top-4 z-30">
+            <div class="flex items-center space-x-3">
+                <div class="w-11 h-11 rounded-full primary-gradient flex items-center justify-center shadow-lg"><i class="fa-solid fa-bolt text-white text-lg"></i></div>
+                <div><h1 class="font-bold text-lg text-white leading-tight">Short2Earn</h1><p class="text-[11px] text-indigo-300" id="user-greeting">Loading...</p></div>
+            </div>
+            <div class="flex items-center space-x-2 bg-slate-800/80 py-2 px-4 rounded-full border border-slate-700 shadow-inner">
+                <i class="fa-solid fa-wallet text-emerald-400"></i><span class="font-bold text-sm text-emerald-400" id="header-balance">$0.00</span>
+            </div>
+        </header>
+
+        <div id="pages-container">
+            <!-- PAGE: HOME -->
+            <div id="page-home" class="page-content fade-in">
+                <div class="mx-4 mb-6 p-6 glass-panel relative overflow-hidden">
+                    <h2 class="text-xs font-bold text-indigo-400 mb-3 uppercase tracking-wider"><i class="fa-solid fa-link mr-2"></i> Create Short Link</h2>
+                    <input type="url" id="long-url-input" placeholder="Paste your long URL here..." class="w-full bg-slate-900/80 border border-slate-700 text-white rounded-xl p-4 mb-4 focus:outline-none focus:border-indigo-500 transition-colors text-sm shadow-inner">
+                    <button id="btn-shorten" class="w-full primary-gradient hover:opacity-90 text-white font-bold py-4 rounded-xl flex items-center justify-center space-x-2 shadow-lg shadow-indigo-500/25 transition-transform active:scale-95">
+                        <i class="fa-solid fa-wand-magic-sparkles"></i><span>Shorten & Earn</span>
+                    </button>
+                    <div id="shorten-result" class="hidden mt-5 p-2 bg-gradient-to-r from-emerald-500/20 to-teal-500/20 border border-emerald-500/30 rounded-xl">
+                        <div class="flex justify-between items-center bg-slate-900 rounded-lg p-3">
+                            <span id="short-link-display" class="text-sm font-mono text-emerald-400 truncate w-[80%]"></span>
+                            <button id="btn-copy-link" class="bg-slate-800 w-10 h-10 rounded-lg text-emerald-400 flex items-center justify-center hover:bg-slate-700 transition-colors"><i class="fa-solid fa-copy"></i></button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-2 gap-4 mx-4 mb-6">
+                    <div class="glass-panel p-5 text-center relative overflow-hidden">
+                        <div class="absolute -right-3 -bottom-3 opacity-5"><i class="fa-solid fa-chart-line text-6xl"></i></div>
+                        <div class="text-slate-400 text-xs mb-1 uppercase font-semibold">Today's Earn</div><div class="text-2xl font-bold text-emerald-400" id="stat-today-earn">$0.00</div>
+                    </div>
+                    <div class="glass-panel p-5 text-center relative overflow-hidden">
+                        <div class="absolute -right-3 -bottom-3 opacity-5"><i class="fa-solid fa-eye text-6xl"></i></div>
+                        <div class="text-slate-400 text-xs mb-1 uppercase font-semibold">Total Views</div><div class="text-2xl font-bold text-white" id="stat-views">0</div>
+                    </div>
+                    <div class="glass-panel p-5 col-span-2 flex justify-between items-center bg-gradient-to-r from-slate-800 to-indigo-900/30">
+                        <div><div class="text-indigo-300 text-xs font-bold uppercase mb-1">Global CPM Rate</div><div class="text-[10px] text-slate-400">Valid for all countries</div></div>
+                        <div class="text-3xl font-bold text-indigo-400" id="stat-cpm">$0.00</div>
+                    </div>
+                </div>
+
+                <div class="mx-4 mb-6 p-5 glass-panel">
+                    <div class="flex justify-between items-center mb-4 border-b border-slate-700 pb-3">
+                        <h3 class="font-bold text-sm text-white"><i class="fa-solid fa-calendar-days mr-2 text-indigo-400"></i> Daily Report</h3>
+                        <input type="month" id="report-month" class="bg-slate-900 border border-slate-700 text-xs text-white rounded p-1.5 focus:outline-none focus:border-indigo-500">
+                    </div>
+                    <div id="earnings-list" class="space-y-2 max-h-60 overflow-y-auto pr-2">
+                        <div class="text-center text-slate-500 py-6 text-xs">Loading data...</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- PAGE: LINKS -->
+            <div id="page-links" class="page-content hidden mx-4 mb-6 fade-in">
+                <div class="flex justify-between items-center mb-6">
+                    <h2 class="text-xl font-bold text-white"><i class="fa-solid fa-link text-indigo-400 mr-2"></i> My Links</h2>
+                </div>
+                <div id="links-list" class="space-y-4">
+                    <div class="text-center text-slate-500 py-10"><i class="fa-solid fa-circle-notch fa-spin text-2xl mb-2 block"></i> Loading...</div>
+                </div>
+            </div>
+
+            <!-- PAGE: REFER -->
+            <div id="page-refer" class="page-content hidden mx-4 mb-6 fade-in">
+                <div class="glass-panel p-6 text-center mb-6 relative overflow-hidden">
+                    <div class="absolute inset-0 bg-gradient-to-b from-indigo-500/10 to-transparent pointer-events-none"></div>
+                    <div class="w-20 h-20 rounded-full bg-slate-800 border border-indigo-500/30 mx-auto flex items-center justify-center mb-4 text-3xl text-indigo-400 relative z-10 shadow-lg shadow-indigo-500/20"><i class="fa-solid fa-users"></i></div>
+                    <h2 class="text-2xl font-bold text-white mb-2">Invite Friends</h2>
+                    <p class="text-sm text-slate-300 mb-6">Earn a lifetime <span class="text-emerald-400 font-bold bg-emerald-500/10 px-2 rounded" id="refer-commission">10%</span> commission from your friends' earnings!</p>
+                    <div class="bg-slate-900 rounded-xl p-2 flex items-center justify-between border border-slate-700">
+                        <span id="referral-link-display" class="text-xs font-mono text-slate-300 truncate px-3 w-[75%]">Generating...</span>
+                        <button id="btn-copy-referral" class="primary-gradient text-white px-5 py-2.5 rounded-lg text-sm font-bold shadow-lg active:scale-95 transition-transform">Copy</button>
+                    </div>
+                </div>
+                
+                <div class="grid grid-cols-2 gap-4 mb-6">
+                    <div class="glass-panel p-5 text-center">
+                        <div class="text-slate-400 text-xs mb-2 uppercase font-semibold">Total Referrals</div>
+                        <div class="text-3xl font-bold text-white" id="stat-referrals">0</div>
+                    </div>
+                    <div class="glass-panel p-5 text-center border border-emerald-500/30 bg-emerald-900/10">
+                        <div class="text-emerald-400 text-xs mb-2 uppercase font-semibold">Total Earned</div>
+                        <div class="text-3xl font-bold text-emerald-400" id="ref-earnings">$0.00</div>
+                    </div>
+                </div>
+
+                <h3 class="text-sm font-bold text-white mb-3 px-2 flex items-center"><i class="fa-solid fa-list-check mr-2 text-indigo-400"></i> Referrals List</h3>
+                <div id="referrals-list" class="space-y-3">
+                    <div class="text-center text-slate-500 py-6 text-sm glass-panel">Loading details...</div>
+                </div>
+            </div>
+
+            <!-- PAGE: WALLET -->
+            <div id="page-wallet" class="page-content hidden mx-4 mb-6 fade-in">
+                <h2 class="text-xl font-bold mb-4 text-white"><i class="fa-solid fa-wallet text-emerald-400 mr-2"></i> My Wallet</h2>
+                
+                <div class="glass-panel p-8 mb-6 text-center border border-emerald-500/30 bg-gradient-to-br from-emerald-900/20 to-transparent relative overflow-hidden">
+                    <i class="fa-solid fa-coins absolute -right-6 -bottom-6 text-8xl text-emerald-500/10"></i>
+                    <div class="text-sm text-emerald-200 mb-2 font-medium">Available Balance</div>
+                    <div class="text-5xl font-bold text-white mb-2" id="wallet-balance-page">$0.00</div>
+                    <div class="text-xs text-slate-400 mb-6">Minimum Withdrawal: <span id="min-withdraw-display" class="font-bold text-white">$5.00</span></div>
+                </div>
+
+                <div class="glass-panel p-6 mb-6 border border-slate-700">
+                    <h3 class="font-bold text-sm text-white mb-4 uppercase tracking-wider border-b border-slate-700 pb-2">Request Payout</h3>
+                    
+                    <div class="mb-4">
+                        <label class="block text-xs font-bold text-slate-400 mb-2">Select Payment Method</label>
+                        <select id="withdraw-method" class="w-full bg-slate-900 border border-slate-700 text-white rounded-lg p-3 text-sm focus:outline-none focus:border-indigo-500">
+                            <option value="">Loading methods...</option>
+                        </select>
+                    </div>
+
+                    <div class="mb-4">
+                        <label class="block text-xs font-bold text-slate-400 mb-2">Payment Details (UPI/Address/Number)</label>
+                        <input type="text" id="withdraw-details" placeholder="Enter valid details..." class="w-full bg-slate-900 border border-slate-700 text-white rounded-lg p-3 text-sm focus:outline-none focus:border-indigo-500">
+                    </div>
+
+                    <div class="mb-6">
+                        <label class="block text-xs font-bold text-slate-400 mb-2">Amount to Withdraw ($)</label>
+                        <input type="number" step="0.01" id="withdraw-amount" placeholder="0.00" class="w-full bg-slate-900 border border-slate-700 text-white rounded-lg p-3 text-sm focus:outline-none focus:border-indigo-500">
+                    </div>
+
+                    <button id="btn-submit-withdraw" onclick="submitWithdrawal()" class="w-full success-gradient hover:opacity-90 text-white font-bold py-4 rounded-xl shadow-lg flex justify-center items-center space-x-2 transition-transform active:scale-95">
+                        <i class="fa-solid fa-money-bill-transfer"></i><span>Submit Request</span>
+                    </button>
+                </div>
+
+                <h3 class="font-bold text-sm text-slate-300 mb-3 px-2"><i class="fa-solid fa-clock-rotate-left mr-2"></i> Payout History</h3>
+                <div id="withdrawal-history-list" class="space-y-3">
+                    <div class="glass-panel p-6 text-center text-slate-500 text-xs">No transactions yet.</div>
+                </div>
+            </div>
+
+            <!-- PAGE: PROFILE -->
+            <div id="page-profile" class="page-content hidden mx-4 mb-6 fade-in">
+                <div class="glass-panel p-8 mb-6 text-center relative overflow-hidden">
+                    <div class="absolute inset-0 bg-gradient-to-br from-indigo-600/20 to-transparent"></div>
+                    <div id="profile-avatar" class="w-24 h-24 rounded-full primary-gradient mx-auto mb-4 flex items-center justify-center text-4xl font-bold text-white shadow-xl border-4 border-slate-800 relative z-10">?</div>
+                    <h2 id="profile-name" class="text-2xl font-bold text-white relative z-10">User Name</h2>
+                    <p id="profile-id" class="text-xs text-indigo-300 font-mono mt-2 bg-indigo-500/20 inline-block px-3 py-1 rounded-full border border-indigo-500/30 relative z-10">ID: ...</p>
+                </div>
+
+                <!-- BOT DEVELOPER API INTEGRATION SECTION -->
+                <div class="glass-panel p-5 mb-4 border border-indigo-500/30 shadow-lg">
+                    <h3 class="text-xs font-bold text-indigo-400 mb-2 uppercase tracking-wider flex items-center">
+                        <i class="fa-solid fa-robot mr-2"></i> Connect Telegram Bot (API)
+                    </h3>
+                    <p class="text-[11px] text-slate-300 mb-3">Apne bot me is API Key ko connect karein taaki links direct convert hon:</p>
+                    
+                    <div class="bg-slate-900 rounded-lg p-2.5 flex items-center justify-between border border-slate-700 mb-3">
+                        <span id="user-api-token" class="text-xs font-mono text-emerald-400 truncate w-[75%]">Loading API Key...</span>
+                        <button onclick="copyText(document.getElementById('user-api-token').innerText)" class="bg-slate-800 px-3 py-1.5 rounded text-xs font-bold text-slate-300 hover:text-white">Copy</button>
+                    </div>
+
+                    <div class="bg-slate-950/60 p-3 rounded-lg border border-slate-800 text-[10px] text-slate-400 font-mono overflow-x-auto">
+                        <span class="text-amber-400">Endpoint:</span> <br>
+                        <code>https://short2earn-hqlv.vercel.app/api/shorten?api=YOUR_KEY&url=LONG_URL</code>
+                    </div>
+                </div>
+
+                <div class="glass-panel p-2 mb-4 shadow-lg">
+                    <h3 class="text-xs font-bold text-slate-400 px-4 pt-4 pb-2 uppercase tracking-wider">Social Links</h3>
+                    
+                    <a id="link-tg" href="#" target="_blank" class="hidden items-center justify-between p-4 hover:bg-slate-800/50 rounded-xl transition">
+                        <div class="flex items-center"><i class="fa-brands fa-telegram w-8 text-blue-400 text-2xl text-center"></i><span class="font-medium text-sm text-slate-200 ml-2">Official Channel</span></div>
+                        <i class="fa-solid fa-arrow-up-right-from-square text-xs text-slate-500"></i>
+                    </a>
+                    
+                    <div id="div-line-yt" class="hidden h-px bg-slate-700/50 mx-4"></div>
+                    
+                    <a id="link-yt" href="#" target="_blank" class="hidden items-center justify-between p-4 hover:bg-slate-800/50 rounded-xl transition">
+                        <div class="flex items-center"><i class="fa-brands fa-youtube w-8 text-red-500 text-2xl text-center"></i><span class="font-medium text-sm text-slate-200 ml-2">YouTube Channel</span></div>
                         <i class="fa-solid fa-arrow-up-right-from-square text-xs text-slate-500"></i>
                     </a>
                 </div>
@@ -56,10 +292,6 @@ sm text-slate-200 ml-2">YouTube Channel</span></div>
         const BOT_USERNAME = 'SeetuOfficialbot'; 
         const APP_SHORT_NAME = 'Mynexify'; 
 
-        // ADSGRAM REWARD BLOCK ID
-        const ADSGRAM_REWARD_BLOCK_ID = '57909';
-        let RewardController = null;
-
         let dbClient = window.supabase.createClient(SUPABASE_URL.replace(/\/rest\/v1\/?$/, "").replace(/\/$/, ""), SUPABASE_ANON_KEY);
         let currentUserData = null;
         let adminSettings = { cpm: 2, ad_timer: 5, ads_per_link: 1, refer_percent: 10, min_withdraw: 5.0, maintenance_mode: false, payment_methods: "UPI" };
@@ -92,14 +324,6 @@ sm text-slate-200 ml-2">YouTube Channel</span></div>
 
         async function initApp() {
             try {
-                // Initialize Adsgram Controller
-                if (window.Adsgram) {
-                    RewardController = window.Adsgram.init({ 
-                        blockId: ADSGRAM_REWARD_BLOCK_ID,
-                        debug: false // Moderation pass hone tak testing ke liye true rakh sakte hain
-                    });
-                }
-
                 await loadAdminSettings();
 
                 if (adminSettings.maintenance_mode) {
@@ -398,17 +622,24 @@ sm text-slate-200 ml-2">YouTube Channel</span></div>
                 btn.innerHTML = `Wait ${timeLeft}s...`;
                 if (timeLeft <= 0) { 
                     clearInterval(interval); 
-                    enableAdButton(btn, timerEl); 
+                    checkAdBlocker(btn, timerEl); 
                 }
             }, 1000);
         }
 
-        function enableAdButton(btn, timerEl) {
-            timerEl.innerHTML = '<i class="fa-solid fa-play text-indigo-500"></i>';
-            btn.disabled = false; 
-            btn.className = "w-full primary-gradient text-white font-bold py-4 rounded-xl flex justify-center items-center shadow-lg shadow-indigo-500/30";
-            btn.innerHTML = "Click to Watch Ad"; 
-            btn.onclick = executeAdClick;
+        function checkAdBlocker(btn, timerEl) {
+            if (typeof show_12158143 === 'undefined') {
+                document.getElementById('ad-blocker-warning').classList.remove('hidden');
+                document.getElementById('ad-step-title').innerText = "Action Required";
+                btn.classList.add('hidden'); 
+                timerEl.innerHTML = '<i class="fa-solid fa-ban text-red-500 text-xl"></i>';
+            } else {
+                timerEl.innerHTML = '<i class="fa-solid fa-play text-indigo-500"></i>';
+                btn.disabled = false; 
+                btn.className = "w-full primary-gradient text-white font-bold py-4 rounded-xl flex justify-center items-center shadow-lg shadow-indigo-500/30";
+                btn.innerHTML = "Click to Watch Ad"; 
+                btn.onclick = executeAdClick;
+            }
         }
 
         function executeAdClick() {
@@ -416,16 +647,8 @@ sm text-slate-200 ml-2">YouTube Channel</span></div>
             btn.innerHTML = `<i class="fa-solid fa-spinner fa-spin mr-2"></i> Loading Ad...`;
             document.getElementById('ad-loader-ring').classList.remove('hidden'); 
             document.getElementById('ad-timer-text').classList.add('hidden');
-
-            if (RewardController) { 
-                RewardController.show()
-                    .then((result) => { 
-                        handleAdSuccess(); 
-                    })
-                    .catch((err) => { 
-                        console.warn("Adsgram error or skipped:", err);
-                        handleAdSuccess(); // Fallback taaki user loop me na fase
-                    });
+            if (typeof show_12158143 === 'function') { 
+                show_12158143().then(() => { handleAdSuccess(); }).catch(() => { handleAdSuccess(); }); 
             } else {
                 handleAdSuccess();
             }
@@ -473,17 +696,7 @@ sm text-slate-200 ml-2">YouTube Channel</span></div>
             try {
                 const { data } = await dbClient.from('links').select('original_url').eq('short_id', window.currentShortId).single();
                 if(data && data.original_url) {
-                    getLinkBtn.onclick = () => {
-                        let finalUrl = data.original_url;
-                        if (!finalUrl.startsWith('http://') && !finalUrl.startsWith('https://')) {
-                            finalUrl = 'https://' + finalUrl;
-                        }
-                        if (tg && typeof tg.openLink === 'function') {
-                            tg.openLink(finalUrl);
-                        } else {
-                            window.location.href = finalUrl;
-                        }
-                    };
+                    getLinkBtn.onclick = () => tg.openLink(data.original_url);
                 }
             } catch(e) {
                 console.error("Error fetching original URL:", e);
