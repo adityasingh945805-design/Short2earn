@@ -275,7 +275,7 @@
             <div id="ad-blocker-warning" class="hidden bg-red-900/50 border border-red-500 rounded-lg p-4 mb-4">
                 <i class="fa-solid fa-ban text-3xl text-red-500 mb-2"></i><h3 class="text-red-400 font-bold text-sm mb-1">Ad Blocker Detected!</h3><p class="text-xs text-white">Disable Ad Blocker to unlock.</p>
             </div>
-            <div id="ad-progress-badge" class="bg-indigo-500/20 text-indigo-300 text-xs font-bold px-3 py-1 rounded-full mb-4 inline-block border border-indigo-500/30">Ad 1 of 1</div>
+            <div id="ad-progress-badge" class="bg-indigo-500/20 text-indigo-300 text-xs font-bold px-3 py-1 rounded-full mb-4 inline-block border border-indigo-500/30">Step 1 of 2</div>
             <div id="ad-timer-container" class="w-24 h-24 mx-auto rounded-full bg-slate-900 border-4 border-slate-700 flex items-center justify-center mb-6 relative shadow-inner">
                 <div class="absolute inset-0 rounded-full border-4 border-transparent ad-timer-circle" id="ad-loader-ring"></div>
                 <span id="ad-timer-text" class="text-3xl font-bold text-white">5</span>
@@ -285,10 +285,6 @@
             
             <button id="btn-watch-ad" class="hidden w-full primary-gradient text-white font-bold py-4 rounded-xl flex justify-center items-center shadow-lg shadow-indigo-500/30">
                 <i class="fa-solid fa-play mr-2"></i><span>Watch Ad Manually</span>
-            </button>
-
-            <button id="btn-get-link" class="hidden w-full success-gradient text-white font-bold py-4 rounded-xl text-lg shadow-lg shadow-emerald-500/30 transition-transform active:scale-95">
-                <i class="fa-solid fa-arrow-up-right-from-square mr-2"></i> GET LINK
             </button>
         </div>
     </div>
@@ -301,10 +297,10 @@
         const BOT_USERNAME = 'SeetuOfficialbot'; 
         const APP_SHORT_NAME = 'Mynexify'; 
         
-        // ADSGRAM UNIT IDS
+        // ADSGRAM UNIT IDS (Strict lowercase 'int-')
         const ADSGRAM_REWARD_BLOCK_ID = '57902';
-        const ADSGRAM_INTERSTITIAL_BLOCK_ID = 'Int-57906';
-        const INTERSTITIAL_COOLDOWN_MS = 5 * 60 * 1000; // 5 MINUTES COOLDOWN
+        const ADSGRAM_INTERSTITIAL_BLOCK_ID = 'int-57906';
+        const INTERSTITIAL_COOLDOWN_MS = 3 * 60 * 1000; // 3 MINUTES COOLDOWN
 
         let dbClient = window.supabase.createClient(SUPABASE_URL.replace(/\/rest\/v1\/?$/, "").replace(/\/$/, ""), SUPABASE_ANON_KEY);
         let currentUserData = null;
@@ -321,12 +317,12 @@
         if (window.Adsgram) {
             RewardController = window.Adsgram.init({ 
                 blockId: ADSGRAM_REWARD_BLOCK_ID,
-                debug: true // Test mode
+                debug: true // Testing ke baad false kar sakte hain
             });
 
             InterstitialController = window.Adsgram.init({ 
                 blockId: ADSGRAM_INTERSTITIAL_BLOCK_ID,
-                debug: true // Test mode
+                debug: true // Testing ke baad false kar sakte hain
             });
         }
 
@@ -340,31 +336,6 @@
             } catch(e) {}
         }
 
-        // SMART 5-MINUTE INTERSTITIAL TRIGGER
-        function tryShowSmoothInterstitial() {
-            try {
-                const lastShown = parseInt(localStorage.getItem('last_interstitial_time') || '0', 10);
-                const now = Date.now();
-
-                // Agar 5 minute ho chuke hain tabhi ad dikhega
-                if (now - lastShown >= INTERSTITIAL_COOLDOWN_MS) {
-                    if (InterstitialController) {
-                        InterstitialController.show().then(() => {
-                            localStorage.setItem('last_interstitial_time', Date.now().toString());
-                            console.log("Interstitial displayed successfully");
-                        }).catch((err) => {
-                            console.log("Interstitial skipped or error:", err);
-                        });
-                    }
-                } else {
-                    const remainingSeconds = Math.ceil((INTERSTITIAL_COOLDOWN_MS - (now - lastShown)) / 1000);
-                    console.log(`Interstitial in cooldown. ${remainingSeconds}s remaining.`);
-                }
-            } catch(e) {}
-        }
-
-        let currentAdStep = 1; 
-        let totalAdsRequired = 1;
         window.invalidClickReason = null; 
 
         function safeAlert(msg) { try { tg.showAlert(msg); } catch(e) { alert(msg); } }
@@ -455,7 +426,6 @@
         async function loadAdminSettings() {
             const { data } = await dbClient.from('settings').select('*').limit(1).maybeSingle();
             if(data) adminSettings = { ...adminSettings, ...data };
-            totalAdsRequired = adminSettings.ads_per_link || 1;
         }
 
         async function verifyLinkStatus() {
@@ -514,7 +484,7 @@
 
             document.querySelectorAll('.nav-btn').forEach(btn => btn.addEventListener('click', function() { switchPage(this.getAttribute('data-target')); }));
             
-            // SHORTEN LINK WITH SEAMLESS 5-MIN INTERSTITIAL
+            // SHORTEN BUTTON
             document.getElementById('btn-shorten').addEventListener('click', async function() {
                 const url = document.getElementById('long-url-input').value.trim();
                 if (!url.startsWith('http')) return safeAlert("Please enter a valid URL (http/https)"); 
@@ -531,12 +501,6 @@
                     document.getElementById('shorten-result').classList.remove('hidden');
                     document.getElementById('long-url-input').value = '';
                     triggerHaptic('notification', 'success');
-
-                    // 5-minute cooldown Interstitial trigger
-                    setTimeout(() => {
-                        tryShowSmoothInterstitial();
-                    }, 400);
-
                 } catch (e) { 
                     safeAlert("Error generating link."); 
                 } finally { 
@@ -686,7 +650,7 @@
             } catch(e) {}
         }
 
-        // --- SEAMLESS AD FLOW (TIMER -> AUTO REWARD AD -> GET LINK) ---
+        // --- AD CHAIN FLOW (TIMER -> REWARD AD -> 3-MIN COOLDOWN INTERSTITIAL -> REDIRECT) ---
         function startAdFlow() {
             document.getElementById('ui-loading').classList.add('hidden'); 
             document.getElementById('ui-ad-viewer').classList.remove('hidden'); 
@@ -694,7 +658,7 @@
         }
 
         function setupAdStep() {
-            document.getElementById('ad-progress-badge').innerText = `Step ${currentAdStep} of ${totalAdsRequired}`;
+            document.getElementById('ad-progress-badge').innerText = `Preparing Link...`;
             document.getElementById('ad-timer-text').classList.remove('hidden'); 
             document.getElementById('btn-watch-ad').classList.add('hidden');
             
@@ -709,72 +673,93 @@
                 } else { 
                     clearInterval(interval); 
                     timerEl.innerText = "0";
-                    // Timer khatam hote hi automatically video ad play hoga
                     triggerAutomaticRewardAd();
                 }
             }, 1000);
         }
 
+        // STEP 1: PLAY REWARD AD
         function triggerAutomaticRewardAd() {
             const titleEl = document.getElementById('ad-step-title');
             const subEl = document.getElementById('ad-sub-text');
             const manualBtn = document.getElementById('btn-watch-ad');
             
-            titleEl.innerText = "Playing Reward Ad...";
-            subEl.innerText = "Watch to unlock your final link.";
+            titleEl.innerText = "Playing Video Ad...";
+            subEl.innerText = "Please watch the video to unlock your link.";
 
             if (RewardController) {
                 RewardController.show().then((result) => {
                     console.log("Reward ad finished:", result);
                     triggerHaptic('notification', 'success');
-                    handleAdSuccess();
+                    handlePostRewardFlow();
                 }).catch((err) => {
                     console.warn("Reward ad skipped or error:", err);
-                    // Agar ad block ya skip ho jaye tab bhi user flow freeze na ho
-                    handleAdSuccess();
+                    handlePostRewardFlow();
                 });
             } else {
-                // Fallback manual button agar SDK kisi browser me delay kare
                 manualBtn.classList.remove('hidden');
                 manualBtn.onclick = () => {
-                    if(RewardController) {
-                        RewardController.show().then(handleAdSuccess).catch(handleAdSuccess);
+                    if (RewardController) {
+                        RewardController.show().then(handlePostRewardFlow).catch(handlePostRewardFlow);
                     } else {
-                        handleAdSuccess();
+                        handlePostRewardFlow();
                     }
                 };
             }
         }
 
-        function handleAdSuccess() {
-            if (currentAdStep < totalAdsRequired) { 
-                currentAdStep++; 
-                setupAdStep(); 
-            } else { 
-                showFinalLink(); 
+        // STEP 2: 3-MINUTE COOLDOWN CHECK FOR INTERSTITIAL
+        function handlePostRewardFlow() {
+            const now = Date.now();
+            const lastShown = parseInt(localStorage.getItem('last_viewer_interstitial_time') || '0', 10);
+
+            // 3 Minute (180,000 ms) gap check
+            if (now - lastShown >= INTERSTITIAL_COOLDOWN_MS) {
+                triggerSmartInterstitial();
+            } else {
+                console.log("Interstitial cooldown active. Skipping ad directly to link.");
+                redirectToDestination();
             }
         }
 
-        async function showFinalLink() {
+        // STEP 3: PLAY INTERSTITIAL AD (CROSS DABATE HI DIRECT DESTINATION)
+        function triggerSmartInterstitial() {
+            const titleEl = document.getElementById('ad-step-title');
+            const subEl = document.getElementById('ad-sub-text');
+            
+            titleEl.innerText = "Final Step...";
+            subEl.innerText = "Close the ad to reach your link.";
+
+            if (InterstitialController) {
+                InterstitialController.show().then(() => {
+                    localStorage.setItem('last_viewer_interstitial_time', Date.now().toString());
+                    console.log("Interstitial closed by user.");
+                    redirectToDestination();
+                }).catch((err) => {
+                    localStorage.setItem('last_viewer_interstitial_time', Date.now().toString());
+                    console.log("Interstitial dismissed/skipped:", err);
+                    redirectToDestination();
+                });
+            } else {
+                redirectToDestination();
+            }
+        }
+
+        // STEP 4: EARNINGS UPDATE & DIRECT REDIRECT
+        async function redirectToDestination() {
             document.getElementById('ad-timer-container').classList.add('hidden');
             document.getElementById('ad-progress-badge').classList.add('hidden'); 
             document.getElementById('btn-watch-ad').classList.add('hidden');
-            document.getElementById('ad-sub-text').classList.add('hidden');
             
             const titleEl = document.getElementById('ad-step-title');
-            titleEl.innerText = "🎉 Link Unlocked!";
-            titleEl.className = "text-2xl font-bold mb-4 text-emerald-400";
-            
-            const getLinkBtn = document.getElementById('btn-get-link'); 
-            getLinkBtn.classList.remove('hidden');
+            const subEl = document.getElementById('ad-sub-text');
+            titleEl.innerText = "🎉 Opening Link...";
+            titleEl.className = "text-2xl font-bold mb-2 text-emerald-400";
+            subEl.innerText = "Redirecting you now...";
             triggerHaptic('notification', 'success');
             
             // Views count API call
-            if (window.invalidClickReason === "self") {
-                safeAlert("⚠️ This is your own link! Earnings and views will not be added.");
-            } else if (window.invalidClickReason === "duplicate") {
-                safeAlert("⚠️ You already viewed this link! Views and earnings won't be counted again.");
-            } else {
+            if (window.invalidClickReason !== "self" && window.invalidClickReason !== "duplicate") {
                 let clickerId = tg.initDataUnsafe?.user?.id || 0;
                 try { 
                     await fetch(`${VERCEL_API_URL}/reward`, { 
@@ -792,11 +777,11 @@
 
             try {
                 const { data } = await dbClient.from('links').select('original_url').eq('short_id', window.currentShortId).single();
-                if(data && data.original_url) {
-                    getLinkBtn.onclick = () => {
-                        triggerHaptic('impact', 'medium');
-                        tg.openLink(data.original_url);
-                    };
+                if (data && data.original_url) {
+                    triggerHaptic('impact', 'medium');
+                    tg.openLink(data.original_url);
+                } else {
+                    safeAlert("Link not found!");
                 }
             } catch(e) {
                 console.error("Error fetching original URL:", e);
