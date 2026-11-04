@@ -6,10 +6,14 @@
     <title>Short2Earn - Mini App</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- Telegram WebApp SDK -->
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     
-    <!-- ADSGRAM SDK -->
+    <!-- Adsgram Production SDK -->
     <script src="https://sad.adsgram.ai/js/sad.min.js"></script>
+    
+    <!-- Supabase JS SDK -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     
     <style>
@@ -158,6 +162,11 @@
 
             <!-- PAGE: WALLET -->
             <div id="page-wallet" class="page-content hidden mx-4 mb-6 fade-in">
+                <!-- OFFICIAL PAYMENT PROOFS (CLAUSE 8 COMPLIANCE BANNER) -->
+                <a href="https://t.me/short2earnn" target="_blank" class="block w-full bg-gradient-to-r from-emerald-600/30 to-teal-600/20 border border-emerald-500/40 hover:bg-emerald-600/40 text-emerald-300 font-semibold text-xs py-3 px-4 rounded-xl text-center shadow-lg transition-all active:scale-[0.99] mb-4">
+                    <i class="fa-solid fa-shield-halved mr-2 text-emerald-400"></i> Official Verified Payout Proofs Channel
+                </a>
+
                 <h2 class="text-xl font-bold mb-4 text-white"><i class="fa-solid fa-wallet text-emerald-400 mr-2"></i> My Wallet</h2>
                 
                 <div class="glass-panel p-8 mb-6 text-center border border-emerald-500/30 bg-gradient-to-br from-emerald-900/20 to-transparent relative overflow-hidden">
@@ -269,23 +278,20 @@
         </nav>
     </div>
 
-    <!-- AD VIEWING UI -->
+    <!-- ADVANCED AD VIEWING UI -->
     <div id="ui-ad-viewer" class="hidden min-h-screen flex flex-col items-center justify-center p-6 z-50">
         <div class="glass-panel w-full max-w-sm p-8 text-center shadow-2xl relative overflow-hidden">
             <div id="ad-blocker-warning" class="hidden bg-red-900/50 border border-red-500 rounded-lg p-4 mb-4">
                 <i class="fa-solid fa-ban text-3xl text-red-500 mb-2"></i><h3 class="text-red-400 font-bold text-sm mb-1">Ad Blocker Detected!</h3><p class="text-xs text-white">Disable Ad Blocker to unlock.</p>
             </div>
-            <div id="ad-progress-badge" class="bg-indigo-500/20 text-indigo-300 text-xs font-bold px-3 py-1 rounded-full mb-4 inline-block border border-indigo-500/30">Preparing Link...</div>
+            <div id="ad-progress-badge" class="bg-indigo-500/20 text-indigo-300 text-xs font-bold px-3 py-1 rounded-full mb-4 inline-block border border-indigo-500/30">Ad 1 of 1</div>
             <div id="ad-timer-container" class="w-24 h-24 mx-auto rounded-full bg-slate-900 border-4 border-slate-700 flex items-center justify-center mb-6 relative shadow-inner">
-                <div class="absolute inset-0 rounded-full border-4 border-transparent ad-timer-circle" id="ad-loader-ring"></div>
+                <div class="absolute inset-0 rounded-full border-4 border-transparent ad-timer-circle hidden" id="ad-loader-ring"></div>
                 <span id="ad-timer-text" class="text-3xl font-bold text-white">5</span>
             </div>
-            <h2 class="text-xl font-bold mb-2 text-white" id="ad-step-title">Preparing Link...</h2>
-            <p class="text-xs text-slate-400 mb-6" id="ad-sub-text">Ad will play automatically to unlock link.</p>
-            
-            <button id="btn-watch-ad" class="hidden w-full primary-gradient text-white font-bold py-4 rounded-xl flex justify-center items-center shadow-lg shadow-indigo-500/30">
-                <i class="fa-solid fa-play mr-2"></i><span>Watch Ad Manually</span>
-            </button>
+            <h2 class="text-2xl font-bold mb-2 text-white" id="ad-step-title">Please Wait...</h2>
+            <button id="btn-watch-ad" disabled class="w-full bg-slate-800 text-slate-500 font-bold py-4 rounded-xl flex justify-center items-center shadow-lg"><span>Wait for Timer...</span></button>
+            <button id="btn-get-link" class="hidden w-full success-gradient text-white font-bold py-4 rounded-xl text-lg shadow-lg shadow-emerald-500/30"><i class="fa-solid fa-arrow-up-right-from-square mr-2"></i> GET LINK</button>
         </div>
     </div>
 
@@ -296,52 +302,30 @@
         
         const BOT_USERNAME = 'SeetuOfficialbot'; 
         const APP_SHORT_NAME = 'Mynexify'; 
-        
-        // ADSGRAM UNIT CONFIGURATION (LIVE REWARD AD)
+
+        // ADSGRAM REWARD BLOCK ID
         const ADSGRAM_REWARD_BLOCK_ID = '57909';
+        let RewardController = null;
 
         let dbClient = window.supabase.createClient(SUPABASE_URL.replace(/\/rest\/v1\/?$/, "").replace(/\/$/, ""), SUPABASE_ANON_KEY);
         let currentUserData = null;
-        let adminSettings = { cpm: 2, ad_timer: 5, refer_percent: 10, min_withdraw: 5.0, maintenance_mode: false, payment_methods: "UPI" };
+        let adminSettings = { cpm: 2, ad_timer: 5, ads_per_link: 1, refer_percent: 10, min_withdraw: 5.0, maintenance_mode: false, payment_methods: "UPI" };
         
         const tg = window.Telegram.WebApp;
         tg.expand();
         tg.setHeaderColor('#0f172a');
 
-        // ADSGRAM REWARD CONTROLLER (LIVE DEBUG: FALSE)
-        let RewardController = null;
-
-        if (window.Adsgram) {
-            RewardController = window.Adsgram.init({ 
-                blockId: ADSGRAM_REWARD_BLOCK_ID,
-                debug: true // Live Production Mode
-            });
-        }
-
-        // HAPTIC FEEDBACK HELPER
-        function triggerHaptic(type = 'impact', style = 'light') {
-            try {
-                if (tg?.HapticFeedback) {
-                    if (type === 'impact') tg.HapticFeedback.impactOccurred(style);
-                    else if (type === 'notification') tg.HapticFeedback.notificationOccurred(style);
-                }
-            } catch(e) {}
-        }
-
+        let currentAdStep = 1; 
+        let totalAdsRequired = 1;
         window.invalidClickReason = null; 
 
         function safeAlert(msg) { try { tg.showAlert(msg); } catch(e) { alert(msg); } }
         function copyText(text) {
             const el = document.createElement('textarea'); el.value = text; document.body.appendChild(el); el.select();
-            try { 
-                document.execCommand('copy'); 
-                triggerHaptic('notification', 'success');
-                safeAlert("Copied to clipboard!"); 
-            } catch (e) {} document.body.removeChild(el);
+            try { document.execCommand('copy'); safeAlert("Copied to clipboard!"); } catch (e) {} document.body.removeChild(el);
         }
 
         function switchPage(pageId) {
-            triggerHaptic('impact', 'light');
             document.querySelectorAll('.page-content').forEach(el => el.classList.add('hidden'));
             document.getElementById(pageId).classList.remove('hidden');
             document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'));
@@ -355,6 +339,14 @@
 
         async function initApp() {
             try {
+                // Initialize Adsgram Controller
+                if (window.Adsgram) {
+                    RewardController = window.Adsgram.init({ 
+                        blockId: ADSGRAM_REWARD_BLOCK_ID,
+                        debug: false // Moderation pass hone tak testing ke liye true rakh sakte hain
+                    });
+                }
+
                 await loadAdminSettings();
 
                 if (adminSettings.maintenance_mode) {
@@ -418,6 +410,7 @@
         async function loadAdminSettings() {
             const { data } = await dbClient.from('settings').select('*').limit(1).maybeSingle();
             if(data) adminSettings = { ...adminSettings, ...data };
+            totalAdsRequired = adminSettings.ads_per_link || 1;
         }
 
         async function verifyLinkStatus() {
@@ -476,29 +469,18 @@
 
             document.querySelectorAll('.nav-btn').forEach(btn => btn.addEventListener('click', function() { switchPage(this.getAttribute('data-target')); }));
             
-            // SHORTEN BUTTON
             document.getElementById('btn-shorten').addEventListener('click', async function() {
                 const url = document.getElementById('long-url-input').value.trim();
                 if (!url.startsWith('http')) return safeAlert("Please enter a valid URL (http/https)"); 
-                
-                triggerHaptic('impact', 'medium');
-                this.innerHTML = '<i class="fa-solid fa-circle-notch fa-spin"></i>'; 
-                this.disabled = true;
-                
+                this.innerHTML = '<i class="fa-solid fa-circle-notch fa-spin"></i>'; this.disabled = true;
                 try {
                     const shortId = Math.random().toString(36).substring(2, 8);
                     await dbClient.from('links').insert([{ original_url: url, short_id: shortId, user_id: currentUserData.id, clicks: 0, earnings: 0 }]);
-                    
                     document.getElementById('short-link-display').innerText = `https://t.me/${BOT_USERNAME}/${APP_SHORT_NAME}?startapp=link_${shortId}`;
                     document.getElementById('shorten-result').classList.remove('hidden');
                     document.getElementById('long-url-input').value = '';
-                    triggerHaptic('notification', 'success');
-                } catch (e) { 
-                    safeAlert("Error generating link."); 
-                } finally { 
-                    this.innerHTML = '<i class="fa-solid fa-wand-magic-sparkles"></i><span>Shorten & Earn</span>'; 
-                    this.disabled = false; 
-                }
+                } catch (e) { safeAlert("Error generating link."); } 
+                finally { this.innerHTML = '<i class="fa-solid fa-wand-magic-sparkles"></i><span>Shorten & Earn</span>'; this.disabled = false; }
             });
 
             document.getElementById('btn-copy-link').addEventListener('click', () => copyText(document.getElementById('short-link-display').innerText));
@@ -521,7 +503,6 @@
             if(!amount || isNaN(amount) || amount < minW) return safeAlert(`Minimum withdrawal is $${minW.toFixed(2)}`);
             if(amount > bal) return safeAlert("Insufficient balance!");
 
-            triggerHaptic('impact', 'heavy');
             const btn = document.getElementById('btn-submit-withdraw');
             btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i><span>Processing...</span>'; btn.disabled = true;
 
@@ -539,7 +520,6 @@
                 document.getElementById('wallet-balance-page').innerText = `$${newBal.toFixed(2)}`;
                 document.getElementById('withdraw-amount').value = '';
                 document.getElementById('withdraw-details').value = '';
-                triggerHaptic('notification', 'success');
                 safeAlert("Withdrawal Request Submitted Successfully!");
                 loadWithdrawalHistory();
             } catch(e) { safeAlert("Error submitting request."); }
@@ -642,7 +622,6 @@
             } catch(e) {}
         }
 
-        // --- SINGLE FLOW: TIMER -> REWARD VIDEO AD -> DIRECT REDIRECT ---
         function startAdFlow() {
             document.getElementById('ui-loading').classList.add('hidden'); 
             document.getElementById('ui-ad-viewer').classList.remove('hidden'); 
@@ -650,71 +629,79 @@
         }
 
         function setupAdStep() {
-            document.getElementById('ad-progress-badge').innerText = `Preparing Link...`;
+            document.getElementById('ad-progress-badge').innerText = `Ad ${currentAdStep} of ${totalAdsRequired}`;
             document.getElementById('ad-timer-text').classList.remove('hidden'); 
-            document.getElementById('btn-watch-ad').classList.add('hidden');
-            
+            document.getElementById('ad-loader-ring').classList.add('hidden');
             let timeLeft = adminSettings.ad_timer || 5;
+            const btn = document.getElementById('btn-watch-ad'); 
             const timerEl = document.getElementById('ad-timer-text');
-            timerEl.innerText = timeLeft;
-
+            btn.disabled = true; 
+            btn.className = "w-full bg-slate-800 text-slate-500 font-bold py-4 rounded-xl flex justify-center items-center shadow-inner";
+            btn.innerHTML = `Wait ${timeLeft}s...`;
+            
             const interval = setInterval(() => {
                 timeLeft--; 
-                if (timeLeft > 0) {
-                    timerEl.innerText = timeLeft; 
-                } else { 
+                timerEl.innerText = timeLeft; 
+                btn.innerHTML = `Wait ${timeLeft}s...`;
+                if (timeLeft <= 0) { 
                     clearInterval(interval); 
-                    timerEl.innerText = "0";
-                    triggerAutomaticRewardAd();
+                    enableAdButton(btn, timerEl); 
                 }
             }, 1000);
         }
 
-        // PLAY REWARD AD (57909)
-        function triggerAutomaticRewardAd() {
-            const titleEl = document.getElementById('ad-step-title');
-            const subEl = document.getElementById('ad-sub-text');
-            const manualBtn = document.getElementById('btn-watch-ad');
-            
-            titleEl.innerText = "Playing Video Ad...";
-            subEl.innerText = "Please watch the video to unlock your link.";
+        function enableAdButton(btn, timerEl) {
+            timerEl.innerHTML = '<i class="fa-solid fa-play text-indigo-500"></i>';
+            btn.disabled = false; 
+            btn.className = "w-full primary-gradient text-white font-bold py-4 rounded-xl flex justify-center items-center shadow-lg shadow-indigo-500/30";
+            btn.innerHTML = "Click to Watch Ad"; 
+            btn.onclick = executeAdClick;
+        }
 
-            if (RewardController) {
-                RewardController.show().then((result) => {
-                    console.log("Reward ad finished successfully:", result);
-                    triggerHaptic('notification', 'success');
-                    redirectToDestination();
-                }).catch((err) => {
-                    console.warn("Reward ad skipped or error:", err);
-                    redirectToDestination();
-                });
+        function executeAdClick() {
+            const btn = document.getElementById('btn-watch-ad'); 
+            btn.innerHTML = `<i class="fa-solid fa-spinner fa-spin mr-2"></i> Loading Ad...`;
+            document.getElementById('ad-loader-ring').classList.remove('hidden'); 
+            document.getElementById('ad-timer-text').classList.add('hidden');
+
+            if (RewardController) { 
+                RewardController.show()
+                    .then((result) => { 
+                        handleAdSuccess(); 
+                    })
+                    .catch((err) => { 
+                        console.warn("Adsgram error or skipped:", err);
+                        handleAdSuccess(); // Fallback taaki user loop me na fase
+                    });
             } else {
-                manualBtn.classList.remove('hidden');
-                manualBtn.onclick = () => {
-                    if (RewardController) {
-                        RewardController.show().then(redirectToDestination).catch(redirectToDestination);
-                    } else {
-                        redirectToDestination();
-                    }
-                };
+                handleAdSuccess();
             }
         }
 
-        // EARNINGS UPDATE & DIRECT REDIRECT TO DESTINATION
-        async function redirectToDestination() {
+        function handleAdSuccess() {
+            if (currentAdStep < totalAdsRequired) { 
+                currentAdStep++; 
+                setupAdStep(); 
+            } else { 
+                showFinalLink(); 
+            }
+        }
+
+        async function showFinalLink() {
+            document.getElementById('btn-watch-ad').classList.add('hidden'); 
             document.getElementById('ad-timer-container').classList.add('hidden');
             document.getElementById('ad-progress-badge').classList.add('hidden'); 
-            document.getElementById('btn-watch-ad').classList.add('hidden');
+            document.getElementById('ad-step-title').innerText = "Link Unlocked!";
             
-            const titleEl = document.getElementById('ad-step-title');
-            const subEl = document.getElementById('ad-sub-text');
-            titleEl.innerText = "🎉 Opening Link...";
-            titleEl.className = "text-2xl font-bold mb-2 text-emerald-400";
-            subEl.innerText = "Redirecting you now...";
-            triggerHaptic('notification', 'success');
+            const getLinkBtn = document.getElementById('btn-get-link'); 
+            getLinkBtn.classList.remove('hidden');
             
             // Views count API call
-            if (window.invalidClickReason !== "self" && window.invalidClickReason !== "duplicate") {
+            if (window.invalidClickReason === "self") {
+                safeAlert("⚠️ This is your own link! Earnings and views will not be added.");
+            } else if (window.invalidClickReason === "duplicate") {
+                safeAlert("⚠️ You already viewed this link! Views and earnings won't be counted again.");
+            } else {
                 let clickerId = tg.initDataUnsafe?.user?.id || 0;
                 try { 
                     await fetch(`${VERCEL_API_URL}/reward`, { 
@@ -732,11 +719,18 @@
 
             try {
                 const { data } = await dbClient.from('links').select('original_url').eq('short_id', window.currentShortId).single();
-                if (data && data.original_url) {
-                    triggerHaptic('impact', 'medium');
-                    tg.openLink(data.original_url);
-                } else {
-                    safeAlert("Link not found!");
+                if(data && data.original_url) {
+                    getLinkBtn.onclick = () => {
+                        let finalUrl = data.original_url;
+                        if (!finalUrl.startsWith('http://') && !finalUrl.startsWith('https://')) {
+                            finalUrl = 'https://' + finalUrl;
+                        }
+                        if (tg && typeof tg.openLink === 'function') {
+                            tg.openLink(finalUrl);
+                        } else {
+                            window.location.href = finalUrl;
+                        }
+                    };
                 }
             } catch(e) {
                 console.error("Error fetching original URL:", e);
