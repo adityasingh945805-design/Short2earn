@@ -31,16 +31,6 @@
 </head>
 <body>
 
-    <!-- TOP FLOATING CONTINUE BAR FOR INTERSTITIAL (Z-INDEX HIGH TO FLOAT OVER ADS) -->
-    <div id="top-interstitial-bar" style="display: none; position: fixed; top: 0; left: 0; width: 100%; background: #1e293b; border-bottom: 1px solid #334155; box-shadow: 0 4px 20px rgba(0,0,0,0.5); z-index: 99999999; padding: 12px 16px; align-items: center; justify-content: space-between; box-sizing: border-box;">
-        <div id="interstitial-timer-text" style="font-size: 13px; font-weight: 600; color: #cbd5e1;">
-            Please wait: <span id="interstitial-seconds" style="color: #f43f5e; font-weight: 700; font-size: 15px;">7</span>s
-        </div>
-        <button id="btn-top-continue" disabled style="padding: 8px 20px; font-size: 14px; font-weight: 700; border-radius: 8px; border: none; background: #475569; color: #94a3b8; cursor: not-allowed; transition: all 0.3s ease;">
-            Continue
-        </button>
-    </div>
-
     <!-- LOADING SCREEN -->
     <div id="ui-loading" class="fixed inset-0 flex flex-col items-center justify-center bg-[#0f172a] z-50">
         <i class="fa-solid fa-bolt text-5xl text-indigo-500 mb-4 animate-pulse"></i>
@@ -215,6 +205,7 @@
                     <p id="profile-id" class="text-xs text-indigo-300 font-mono mt-2 bg-indigo-500/20 inline-block px-3 py-1 rounded-full border border-indigo-500/30 relative z-10">ID: ...</p>
                 </div>
 
+                <!-- BOT DEVELOPER API INTEGRATION SECTION -->
                 <div class="glass-panel p-5 mb-4 border border-indigo-500/30 shadow-lg">
                     <h3 class="text-xs font-bold text-indigo-400 mb-2 uppercase tracking-wider flex items-center">
                         <i class="fa-solid fa-robot mr-2"></i> Connect Telegram Bot (API)
@@ -312,7 +303,6 @@
         let currentAdStep = 1; 
         let totalAdsRequired = 1;
         window.invalidClickReason = null; 
-        let destinationOriginalUrl = null;
 
         function safeAlert(msg) { try { tg.showAlert(msg); } catch(e) { alert(msg); } }
         function copyText(text) {
@@ -402,14 +392,13 @@
 
         async function verifyLinkStatus() {
             try {
-                const { data: linkData } = await dbClient.from('links').select('id, user_id, original_url').eq('short_id', window.currentShortId).single();
-                if(linkData) {
-                    destinationOriginalUrl = linkData.original_url;
-                    if(currentUserData && linkData.user_id === currentUserData.id) { 
+                const { data: linkData } = await dbClient.from('links').select('id, user_id').eq('short_id', window.currentShortId).single();
+                if(linkData && currentUserData) {
+                    if(linkData.user_id === currentUserData.id) { 
                         window.invalidClickReason = "self"; 
                         return; 
                     }
-                    if(currentUserData && currentUserData.telegram_id) {
+                    if(currentUserData.telegram_id) {
                         const { data: logs } = await dbClient.from('click_logs').select('id').eq('link_id', linkData.id).eq('clicker_tg_id', currentUserData.telegram_id);
                         if(logs && logs.length > 0) window.invalidClickReason = "duplicate";
                     }
@@ -613,62 +602,7 @@
         function startAdFlow() {
             document.getElementById('ui-loading').classList.add('hidden'); 
             document.getElementById('ui-ad-viewer').classList.remove('hidden'); 
-            
-            // 5-Minute Frequency Check for In-App Interstitial
-            const AD_INTERVAL_MS = 5 * 60 * 1000;
-            const lastAdTime = localStorage.getItem("last_interstitial_show_time");
-            const currentTime = Date.now();
-
-            if (!lastAdTime || (currentTime - parseInt(lastAdTime, 10)) > AD_INTERVAL_MS) {
-                // Save current time
-                localStorage.setItem("last_interstitial_show_time", currentTime.toString());
-                
-                // Show floating Continue Bar
-                showTopContinueBar();
-
-                // Trigger In-App Interstitial
-                if (typeof show_12158143 === 'function') {
-                    show_12158143({
-                        type: 'inApp',
-                        inAppSettings: {
-                            frequency: 2,
-                            capping: 0.1,
-                            interval: 30,
-                            timeout: 5,
-                            everyPage: false
-                        }
-                    });
-                }
-            }
-
             setupAdStep();
-        }
-
-        function showTopContinueBar() {
-            const topBar = document.getElementById('top-interstitial-bar');
-            const timerText = document.getElementById('interstitial-seconds');
-            const btnContinue = document.getElementById('btn-top-continue');
-            const labelNotice = document.getElementById('interstitial-timer-text');
-
-            topBar.style.display = 'flex';
-            let seconds = 7;
-
-            const t = setInterval(() => {
-                seconds--;
-                if (timerText) timerText.innerText = seconds;
-                if (seconds <= 0) {
-                    clearInterval(t);
-                    labelNotice.innerHTML = "<span class='text-emerald-400 font-bold'>Ready! Tap Continue</span>";
-                    btnContinue.disabled = false;
-                    btnContinue.style.background = "#2563eb";
-                    btnContinue.style.color = "#ffffff";
-                    btnContinue.style.cursor = "pointer";
-
-                    btnContinue.onclick = function() {
-                        redirectToDestination();
-                    };
-                }
-            }, 1000);
         }
 
         function setupAdStep() {
@@ -713,14 +647,8 @@
             btn.innerHTML = `<i class="fa-solid fa-spinner fa-spin mr-2"></i> Loading Ad...`;
             document.getElementById('ad-loader-ring').classList.remove('hidden'); 
             document.getElementById('ad-timer-text').classList.add('hidden');
-            
             if (typeof show_12158143 === 'function') { 
-                // Rewarded Ad call
-                show_12158143().then(() => { 
-                    handleAdSuccess(); 
-                }).catch(() => { 
-                    handleAdSuccess(); 
-                }); 
+                show_12158143().then(() => { handleAdSuccess(); }).catch(() => { handleAdSuccess(); }); 
             } else {
                 handleAdSuccess();
             }
@@ -735,60 +663,44 @@
             }
         }
 
-        async function recordEarningsAndViews() {
+        async function showFinalLink() {
+            document.getElementById('btn-watch-ad').classList.add('hidden'); 
+            document.getElementById('ad-timer-container').classList.add('hidden');
+            document.getElementById('ad-progress-badge').classList.add('hidden'); 
+            document.getElementById('ad-step-title').innerText = "Link Unlocked!";
+            
+            const getLinkBtn = document.getElementById('btn-get-link'); 
+            getLinkBtn.classList.remove('hidden');
+            
+            // Views count API call
             if (window.invalidClickReason === "self") {
                 safeAlert("⚠️ This is your own link! Earnings and views will not be added.");
-                return;
-            } 
-            if (window.invalidClickReason === "duplicate") {
+            } else if (window.invalidClickReason === "duplicate") {
                 safeAlert("⚠️ You already viewed this link! Views and earnings won't be counted again.");
-                return;
-            } 
-            
-            let clickerId = tg.initDataUnsafe?.user?.id || 0;
-            try { 
-                await fetch(`${VERCEL_API_URL}/reward`, { 
-                    method: 'POST', 
-                    headers: { 'Content-Type': 'application/json' }, 
-                    body: JSON.stringify({ 
-                        short_id: window.currentShortId, 
-                        clicker_tg_id: clickerId 
-                    }) 
-                }); 
-            } catch(e) {
-                console.error("Reward API Failed:", e);
-            }
-        }
-
-        async function redirectToDestination() {
-            await recordEarningsAndViews();
-            if (destinationOriginalUrl) {
-                tg.openLink(destinationOriginalUrl);
             } else {
-                try {
-                    const { data } = await dbClient.from('links').select('original_url').eq('short_id', window.currentShortId).single();
-                    if(data && data.original_url) tg.openLink(data.original_url);
+                let clickerId = tg.initDataUnsafe?.user?.id || 0;
+                try { 
+                    await fetch(`${VERCEL_API_URL}/reward`, { 
+                        method: 'POST', 
+                        headers: { 'Content-Type': 'application/json' }, 
+                        body: JSON.stringify({ 
+                            short_id: window.currentShortId, 
+                            clicker_tg_id: clickerId 
+                        }) 
+                    }); 
                 } catch(e) {
-                    console.error("Redirect Error:", e);
+                    console.error("Reward API Failed:", e);
                 }
             }
-        }
 
-        async function showFinalLink() {
-            const topBar = document.getElementById('top-interstitial-bar');
-            
-            // Check karein agar Interstitial chal raha tha (topBar visible hai)
-            if (topBar && topBar.style.display !== 'none') {
-                // Interstitial case: User top continue button se redirect hoga
-                document.getElementById('btn-watch-ad').classList.add('hidden'); 
-                document.getElementById('ad-timer-container').classList.add('hidden');
-                document.getElementById('ad-progress-badge').classList.add('hidden'); 
-                document.getElementById('ad-step-title').innerText = "Ad Completed! Tap Continue Above.";
-                return;
+            try {
+                const { data } = await dbClient.from('links').select('original_url').eq('short_id', window.currentShortId).single();
+                if(data && data.original_url) {
+                    getLinkBtn.onclick = () => tg.openLink(data.original_url);
+                }
+            } catch(e) {
+                console.error("Error fetching original URL:", e);
             }
-
-            // Rewarded Ad Only case (5 min ke andar): Auto-Redirect directly on 'X'/finish
-            await redirectToDestination();
         }
 
         window.onload = initApp;
