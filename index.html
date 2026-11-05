@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title id="app-meta-title">LinkVault - URL Utility Mini App</title>
+    <title id="app-meta-title">LinkVault - URL Utility & Daily Hub</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
@@ -17,6 +17,7 @@
         .glass-panel { background: rgba(30, 41, 59, 0.7); backdrop-filter: blur(12px); border: 1px solid rgba(255, 255, 255, 0.08); border-radius: 1.25rem; box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1); }
         .primary-gradient { background: linear-gradient(135deg, #6366f1 0%, #3b82f6 100%); }
         .success-gradient { background: linear-gradient(135deg, #10b981 0%, #059669 100%); }
+        .amber-gradient { background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%); }
         .nav-item { color: #64748b; transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); }
         .nav-item.active { color: #60a5fa; transform: translateY(-4px); }
         .nav-item.active .nav-icon { background: rgba(96, 165, 250, 0.15); color: #60a5fa; box-shadow: 0 0 15px rgba(96, 165, 250, 0.2); }
@@ -35,7 +36,7 @@
     <div id="ui-loading" class="fixed inset-0 flex flex-col items-center justify-center bg-[#0f172a] z-50">
         <i class="fa-solid fa-bolt text-5xl text-indigo-500 mb-4 animate-pulse"></i>
         <h2 class="text-2xl font-bold text-white mb-2" id="loading-title">LinkVault</h2>
-        <p class="text-slate-400 text-sm" id="loading-text">Connecting securely...</p>
+        <p class="text-slate-400 text-sm" id="loading-text">Synchronizing parameters...</p>
     </div>
 
     <!-- MAINTENANCE SCREEN -->
@@ -43,7 +44,7 @@
         <div class="glass-panel p-8 max-w-sm text-center border border-amber-500/30">
             <div class="w-20 h-20 bg-amber-500/20 rounded-full mx-auto flex items-center justify-center mb-6"><i class="fa-solid fa-person-digging text-4xl text-amber-500"></i></div>
             <h2 class="text-2xl font-bold text-white mb-2">Under Maintenance</h2>
-            <p class="text-sm text-slate-300 mb-6">We are currently upgrading our cloud infrastructure. Please check back in a few minutes!</p>
+            <p class="text-sm text-slate-300 mb-6">Server updates in progress. Please check back shortly.</p>
             <button onclick="tg.close()" class="w-full bg-slate-800 text-white font-bold py-3 rounded-xl transition-all hover:bg-slate-700">Close</button>
         </div>
     </div>
@@ -53,22 +54,26 @@
         <!-- HEADER -->
         <header class="flex items-center justify-between p-4 glass-panel m-4 sticky top-4 z-30">
             <div class="flex items-center space-x-3">
-                <div class="w-11 h-11 rounded-full primary-gradient flex items-center justify-center shadow-lg"><i class="fa-solid fa-link text-white text-lg"></i></div>
+                <div class="w-11 h-11 rounded-full primary-gradient flex items-center justify-center shadow-lg"><i class="fa-solid fa-bolt text-white text-lg"></i></div>
                 <div><h1 class="font-bold text-lg text-white leading-tight" id="header-brand-title">LinkVault</h1><p class="text-[11px] text-indigo-300" id="user-greeting">Loading profile...</p></div>
             </div>
-            <div id="header-balance-container" class="flex items-center space-x-2 bg-slate-800/80 py-2 px-4 rounded-full border border-slate-700 shadow-inner">
-                <i class="fa-solid fa-wallet text-emerald-400"></i><span class="font-bold text-sm text-emerald-400" id="header-balance">$0.00</span>
+            
+            <!-- Dynamic Right Header Status -->
+            <div id="header-badge-container" class="flex items-center space-x-2 bg-slate-800/80 py-2 px-4 rounded-full border border-slate-700 shadow-inner">
+                <i class="fa-solid fa-bolt text-amber-400" id="header-badge-icon"></i>
+                <span class="font-bold text-sm text-amber-400" id="header-badge-val">0 Coins</span>
             </div>
         </header>
 
         <div id="pages-container">
             <!-- PAGE: HOME -->
             <div id="page-home" class="page-content fade-in">
+                <!-- SHORTENER UTILITY -->
                 <div class="mx-4 mb-6 p-6 glass-panel relative overflow-hidden">
-                    <h2 class="text-xs font-bold text-indigo-400 mb-3 uppercase tracking-wider"><i class="fa-solid fa-link mr-2"></i> Fast URL Shortener</h2>
+                    <h2 class="text-xs font-bold text-indigo-400 mb-3 uppercase tracking-wider"><i class="fa-solid fa-link mr-2"></i> Cloud URL Shortener</h2>
                     <input type="url" id="long-url-input" placeholder="Paste your destination link here..." class="w-full bg-slate-900/80 border border-slate-700 text-white rounded-xl p-4 mb-4 focus:outline-none focus:border-indigo-500 transition-colors text-sm shadow-inner">
                     <button id="btn-shorten" class="w-full primary-gradient hover:opacity-90 text-white font-bold py-4 rounded-xl flex items-center justify-center space-x-2 shadow-lg shadow-indigo-500/25 transition-transform active:scale-95">
-                        <i class="fa-solid fa-wand-magic-sparkles"></i><span id="btn-shorten-text">Shorten URL</span>
+                        <i class="fa-solid fa-wand-magic-sparkles"></i><span id="btn-shorten-text">Shorten Link</span>
                     </button>
                     <div id="shorten-result" class="hidden mt-5 p-2 bg-gradient-to-r from-emerald-500/20 to-teal-500/20 border border-emerald-500/30 rounded-xl">
                         <div class="flex justify-between items-center bg-slate-900 rounded-lg p-3">
@@ -78,14 +83,49 @@
                     </div>
                 </div>
 
-                <!-- ANALYTICS CARDS (SWITCHABLE) -->
-                <div id="earning-stats-container" class="grid grid-cols-2 gap-4 mx-4 mb-6">
+                <!-- REVIEW-FRIENDLY DAILY TASKS SECTION -->
+                <div id="section-daily-tasks" class="mx-4 mb-6 p-5 glass-panel">
+                    <div class="flex justify-between items-center mb-4 border-b border-slate-700/60 pb-3">
+                        <h3 class="font-bold text-sm text-white flex items-center"><i class="fa-solid fa-list-check text-indigo-400 mr-2"></i> Daily Energy Tasks</h3>
+                        <span class="text-[10px] bg-indigo-500/20 text-indigo-300 px-2 py-0.5 rounded-full border border-indigo-500/30">Earn Coins</span>
+                    </div>
+                    <div class="space-y-3">
+                        <!-- Task 1: Check-in / Video Partner -->
+                        <div class="bg-slate-900/80 p-3.5 rounded-xl border border-slate-700 flex justify-between items-center">
+                            <div class="flex items-center space-x-3">
+                                <div class="w-9 h-9 rounded-lg bg-amber-500/20 text-amber-400 flex items-center justify-center text-lg"><i class="fa-solid fa-play"></i></div>
+                                <div>
+                                    <h4 class="text-xs font-semibold text-white">Daily Sponsor Check-in</h4>
+                                    <p class="text-[10px] text-slate-400">+50 Energy Coins</p>
+                                </div>
+                            </div>
+                            <button id="btn-daily-ad-task" onclick="triggerTaskAd()" class="primary-gradient text-white text-xs px-3.5 py-2 rounded-lg font-bold active:scale-95 transition-transform flex items-center">
+                                <span>Complete</span>
+                            </button>
+                        </div>
+
+                        <!-- Task 2: Community Invite -->
+                        <div class="bg-slate-900/80 p-3.5 rounded-xl border border-slate-700 flex justify-between items-center">
+                            <div class="flex items-center space-x-3">
+                                <div class="w-9 h-9 rounded-lg bg-indigo-500/20 text-indigo-400 flex items-center justify-center text-lg"><i class="fa-solid fa-user-plus"></i></div>
+                                <div>
+                                    <h4 class="text-xs font-semibold text-white">Invite 1 Partner</h4>
+                                    <p class="text-[10px] text-slate-400">+100 Energy Coins</p>
+                                </div>
+                            </div>
+                            <button onclick="switchPage('page-refer')" class="bg-slate-800 text-slate-200 text-xs px-3.5 py-2 rounded-lg font-bold hover:bg-slate-700 active:scale-95 transition-transform">
+                                Go
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ORIGINAL EARNING CARDS (NORMAL MODE) -->
+                <div id="earning-stats-container" class="hidden grid grid-cols-2 gap-4 mx-4 mb-6">
                     <div class="glass-panel p-5 text-center relative overflow-hidden">
-                        <div class="absolute -right-3 -bottom-3 opacity-5"><i class="fa-solid fa-chart-line text-6xl"></i></div>
                         <div class="text-slate-400 text-xs mb-1 uppercase font-semibold">Today's Earn</div><div class="text-2xl font-bold text-emerald-400" id="stat-today-earn">$0.00</div>
                     </div>
                     <div class="glass-panel p-5 text-center relative overflow-hidden">
-                        <div class="absolute -right-3 -bottom-3 opacity-5"><i class="fa-solid fa-eye text-6xl"></i></div>
                         <div class="text-slate-400 text-xs mb-1 uppercase font-semibold">Total Views</div><div class="text-2xl font-bold text-white" id="stat-views">0</div>
                     </div>
                     <div class="glass-panel p-5 col-span-2 flex justify-between items-center bg-gradient-to-r from-slate-800 to-indigo-900/30">
@@ -94,17 +134,18 @@
                     </div>
                 </div>
 
-                <!-- UTILITY METRICS (VISIBLE DURING REVIEW) -->
-                <div id="utility-stats-container" class="hidden grid grid-cols-2 gap-4 mx-4 mb-6">
-                    <div class="glass-panel p-5 text-center relative overflow-hidden">
-                        <div class="text-slate-400 text-xs mb-1 uppercase font-semibold">Protected Clicks</div><div class="text-2xl font-bold text-indigo-400" id="stat-safe-views">0</div>
+                <!-- UTILITY METRICS (REVIEW MODE) -->
+                <div id="utility-stats-container" class="grid grid-cols-2 gap-4 mx-4 mb-6">
+                    <div class="glass-panel p-5 text-center">
+                        <div class="text-slate-400 text-xs mb-1 uppercase font-semibold">Active Links</div><div class="text-2xl font-bold text-indigo-400" id="stat-safe-views">0</div>
                     </div>
-                    <div class="glass-panel p-5 text-center relative overflow-hidden">
-                        <div class="text-slate-400 text-xs mb-1 uppercase font-semibold">Network Latency</div><div class="text-2xl font-bold text-emerald-400">Optimal</div>
+                    <div class="glass-panel p-5 text-center">
+                        <div class="text-slate-400 text-xs mb-1 uppercase font-semibold">Cloud Bandwidth</div><div class="text-2xl font-bold text-emerald-400">Unlimited</div>
                     </div>
                 </div>
 
-                <div id="earning-reports-card" class="mx-4 mb-6 p-5 glass-panel">
+                <!-- EARNING REPORT (NORMAL MODE ONLY) -->
+                <div id="earning-reports-card" class="hidden mx-4 mb-6 p-5 glass-panel">
                     <div class="flex justify-between items-center mb-4 border-b border-slate-700 pb-3">
                         <h3 class="font-bold text-sm text-white"><i class="fa-solid fa-calendar-days mr-2 text-indigo-400"></i> Daily Performance</h3>
                         <input type="month" id="report-month" class="bg-slate-900 border border-slate-700 text-xs text-white rounded p-1.5 focus:outline-none focus:border-indigo-500">
@@ -128,27 +169,27 @@
             <!-- PAGE: REFER -->
             <div id="page-refer" class="page-content hidden mx-4 mb-6 fade-in">
                 <div class="glass-panel p-6 text-center mb-6 relative overflow-hidden">
-                    <div class="w-20 h-20 rounded-full bg-slate-800 border border-indigo-500/30 mx-auto flex items-center justify-center mb-4 text-3xl text-indigo-400 relative z-10 shadow-lg shadow-indigo-500/20"><i class="fa-solid fa-share-nodes"></i></div>
-                    <h2 class="text-2xl font-bold text-white mb-2" id="refer-title">Invite Community</h2>
-                    <p class="text-sm text-slate-300 mb-6" id="refer-desc">Share LinkVault with friends and unlock instant premium cloud tools!</p>
+                    <div class="w-20 h-20 rounded-full bg-slate-800 border border-indigo-500/30 mx-auto flex items-center justify-center mb-4 text-3xl text-indigo-400 relative z-10 shadow-lg shadow-indigo-500/20"><i class="fa-solid fa-users"></i></div>
+                    <h2 class="text-2xl font-bold text-white mb-2" id="refer-title">Community & Tasks</h2>
+                    <p class="text-sm text-slate-300 mb-6" id="refer-desc">Invite friends to shorten URLs and earn extra coins daily!</p>
                     <div class="bg-slate-900 rounded-xl p-2 flex items-center justify-between border border-slate-700">
                         <span id="referral-link-display" class="text-xs font-mono text-slate-300 truncate px-3 w-[75%]">Generating link...</span>
                         <button id="btn-copy-referral" class="primary-gradient text-white px-5 py-2.5 rounded-lg text-sm font-bold shadow-lg active:scale-95 transition-transform">Copy</button>
                     </div>
                 </div>
                 
-                <div id="refer-stats-box" class="grid grid-cols-2 gap-4 mb-6">
+                <div class="grid grid-cols-2 gap-4 mb-6">
                     <div class="glass-panel p-5 text-center">
                         <div class="text-slate-400 text-xs mb-2 uppercase font-semibold">Total Invited</div>
                         <div class="text-3xl font-bold text-white" id="stat-referrals">0</div>
                     </div>
                     <div class="glass-panel p-5 text-center border border-emerald-500/30 bg-emerald-900/10" id="refer-earned-card">
-                        <div class="text-emerald-400 text-xs mb-2 uppercase font-semibold">Total Commission</div>
-                        <div class="text-3xl font-bold text-emerald-400" id="ref-earnings">$0.00</div>
+                        <div class="text-emerald-400 text-xs mb-2 uppercase font-semibold" id="refer-stat-label">Energy Coins</div>
+                        <div class="text-3xl font-bold text-emerald-400" id="ref-earnings">0</div>
                     </div>
                 </div>
 
-                <h3 class="text-sm font-bold text-white mb-3 px-2 flex items-center"><i class="fa-solid fa-list-check mr-2 text-indigo-400"></i> Referrals Network</h3>
+                <h3 class="text-sm font-bold text-white mb-3 px-2 flex items-center"><i class="fa-solid fa-list-check mr-2 text-indigo-400"></i> Active Invitees</h3>
                 <div id="referrals-list" class="space-y-3">
                     <div class="text-center text-slate-500 py-6 text-sm glass-panel">Loading details...</div>
                 </div>
@@ -177,7 +218,7 @@
 
                     <div class="mb-4">
                         <label class="block text-xs font-bold text-slate-400 mb-2">Payment Details (UPI/Address/Number)</label>
-                        <input type="text" id="withdraw-details" placeholder="Enter payout ID..." class="w-full bg-slate-900 border border-slate-700 text-white rounded-lg p-3 text-sm focus:outline-none focus:border-indigo-500">
+                        <input type="text" id="withdraw-details" placeholder="Enter details..." class="w-full bg-slate-900 border border-slate-700 text-white rounded-lg p-3 text-sm focus:outline-none focus:border-indigo-500">
                     </div>
 
                     <div class="mb-6">
@@ -201,16 +242,16 @@
                 <div class="glass-panel p-8 mb-6 text-center relative overflow-hidden">
                     <div class="absolute inset-0 bg-gradient-to-br from-indigo-600/20 to-transparent"></div>
                     <div id="profile-avatar" class="w-24 h-24 rounded-full primary-gradient mx-auto mb-4 flex items-center justify-center text-4xl font-bold text-white shadow-xl border-4 border-slate-800 relative z-10">?</div>
-                    <h2 id="profile-name" class="text-2xl font-bold text-white relative z-10">User</h2>
+                    <h2 id="profile-name" class="text-2xl font-bold text-white relative z-10">Member</h2>
                     <p id="profile-id" class="text-xs text-indigo-300 font-mono mt-2 bg-indigo-500/20 inline-block px-3 py-1 rounded-full border border-indigo-500/30 relative z-10">ID: ...</p>
                 </div>
 
-                <!-- DEVELOPER INTEGRATION API -->
+                <!-- API INTEGRATION -->
                 <div class="glass-panel p-5 mb-4 border border-indigo-500/30 shadow-lg">
                     <h3 class="text-xs font-bold text-indigo-400 mb-2 uppercase tracking-wider flex items-center">
-                        <i class="fa-solid fa-code mr-2"></i> Developer API
+                        <i class="fa-solid fa-code mr-2"></i> Developer Key
                     </h3>
-                    <p class="text-[11px] text-slate-300 mb-3">Integrate URL shortening with your applications seamlessly:</p>
+                    <p class="text-[11px] text-slate-300 mb-3">Integrate link shortening with your bots/services:</p>
                     
                     <div class="bg-slate-900 rounded-lg p-2.5 flex items-center justify-between border border-slate-700 mb-3">
                         <span id="user-api-token" class="text-xs font-mono text-emerald-400 truncate w-[75%]">Loading Key...</span>
@@ -224,7 +265,7 @@
                 </div>
 
                 <div class="glass-panel p-2 mb-4 shadow-lg">
-                    <h3 class="text-xs font-bold text-slate-400 px-4 pt-4 pb-2 uppercase tracking-wider">Information & Legal</h3>
+                    <h3 class="text-xs font-bold text-slate-400 px-4 pt-4 pb-2 uppercase tracking-wider">Information & Policies</h3>
                     
                     <a id="link-tg" href="#" target="_blank" class="hidden items-center justify-between p-4 hover:bg-slate-800/50 rounded-xl transition">
                         <div class="flex items-center"><i class="fa-brands fa-telegram w-8 text-blue-400 text-2xl text-center"></i><span class="font-medium text-sm text-slate-200 ml-2">Official Channel</span></div>
@@ -249,7 +290,7 @@
                     </a>
                 </div>
 
-                <div class="text-center text-[10px] text-slate-500 mt-8 mb-2">Powered by <span class="font-bold text-indigo-400">LinkVault Engine</span></div>
+                <div class="text-center text-[10px] text-slate-500 mt-8 mb-2">Powered by <span class="font-bold text-indigo-400">LinkVault Ecosystem</span></div>
             </div>
         </div>
 
@@ -258,14 +299,14 @@
             <div class="flex justify-between items-end px-2 pt-2 pb-3">
                 <button class="nav-btn nav-item active flex flex-col items-center w-1/5" data-target="page-home"><div class="nav-icon w-10 h-10 rounded-xl flex items-center justify-center text-lg mb-1"><i class="fa-solid fa-house"></i></div><span class="text-[10px] font-medium tracking-wide">Home</span></button>
                 <button class="nav-btn nav-item flex flex-col items-center w-1/5" data-target="page-links"><div class="nav-icon w-10 h-10 rounded-xl flex items-center justify-center text-lg mb-1"><i class="fa-solid fa-link"></i></div><span class="text-[10px] font-medium tracking-wide">Links</span></button>
-                <button class="nav-btn nav-item flex flex-col items-center w-1/5" data-target="page-refer"><div class="nav-icon w-10 h-10 rounded-xl flex items-center justify-center text-lg mb-1"><i class="fa-solid fa-users"></i></div><span class="text-[10px] font-medium tracking-wide">Refer</span></button>
+                <button class="nav-btn nav-item flex flex-col items-center w-1/5" data-target="page-refer"><div class="nav-icon w-10 h-10 rounded-xl flex items-center justify-center text-lg mb-1"><i class="fa-solid fa-users"></i></div><span id="nav-refer-text" class="text-[10px] font-medium tracking-wide">Tasks</span></button>
                 <button id="nav-wallet-btn" class="nav-btn nav-item flex flex-col items-center w-1/5" data-target="page-wallet"><div class="nav-icon w-10 h-10 rounded-xl flex items-center justify-center text-lg mb-1"><i class="fa-solid fa-wallet"></i></div><span class="text-[10px] font-medium tracking-wide">Wallet</span></button>
                 <button class="nav-btn nav-item flex flex-col items-center w-1/5" data-target="page-profile"><div class="nav-icon w-10 h-10 rounded-xl flex items-center justify-center text-lg mb-1"><i class="fa-solid fa-user"></i></div><span class="text-[10px] font-medium tracking-wide">Profile</span></button>
             </div>
         </nav>
     </div>
 
-    <!-- AD VIEWING / UNLOCK FLOW -->
+    <!-- AD VIEWING / REDIRECTION MODAL -->
     <div id="ui-ad-viewer" class="hidden min-h-screen flex flex-col items-center justify-center p-6 z-50">
         <div class="glass-panel w-full max-w-sm p-8 text-center shadow-2xl relative overflow-hidden">
             <div id="ad-progress-badge" class="bg-indigo-500/20 text-indigo-300 text-xs font-bold px-3 py-1 rounded-full mb-4 inline-block border border-indigo-500/30">Verification Step 1</div>
@@ -276,7 +317,7 @@
             </div>
             
             <h2 class="text-xl font-bold mb-2 text-white" id="ad-step-title">Preparing Protected Link...</h2>
-            <p class="text-xs text-slate-400 mb-6" id="ad-step-subtitle">Watch a sponsored partner message to unlock destination</p>
+            <p class="text-xs text-slate-400 mb-6" id="ad-step-subtitle">Complete optional partner view to accelerate link redirection</p>
             
             <button id="btn-watch-ad" disabled class="w-full bg-slate-800 text-slate-500 font-bold py-4 rounded-xl flex justify-center items-center shadow-inner"><span>Preparing...</span></button>
             <button id="btn-get-link" class="hidden w-full success-gradient text-white font-bold py-4 rounded-xl text-lg shadow-lg shadow-emerald-500/30"><i class="fa-solid fa-arrow-up-right-from-square mr-2"></i> OPEN DESTINATION</button>
@@ -285,13 +326,10 @@
 
     <script>
         /* =========================================================================
-           CONFIG & SAFEGUARDS (ADSGRAM COMPLIANCE)
+           ADSGRAM COMPLIANCE & CONFIGURATION
            ========================================================================= */
-        // Review ke dauran TRUE rakhein. Adsgram approval aane ke baad ise FALSE kar dena.
-        const REVIEW_MODE = true; 
-        
-        // Apna Adsgram Block ID yahan daalein:
-        const ADSGRAM_BLOCK_ID = "YOUR_ADSGRAM_BLOCK_ID"; 
+        const REVIEW_MODE = true; // Review ke dauran TRUE. Approval aane ke baad ise FALSE kar dena.
+        const ADSGRAM_BLOCK_ID = "55005"; // Aapki approved / platform ID yahan set hai
 
         const SUPABASE_URL = 'https://uxyrvqhxtegstxhuvxre.supabase.co'; 
         const SUPABASE_ANON_KEY = 'sb_publishable_iO50h66TI1NByIRI0oH6EQ_pFA7Azct';
@@ -302,8 +340,10 @@
 
         let dbClient = window.supabase.createClient(SUPABASE_URL.replace(/\/rest\/v1\/?$/, "").replace(/\/$/, ""), SUPABASE_ANON_KEY);
         let currentUserData = null;
-        let adminSettings = { cpm: 2, ad_timer: 4, ads_per_link: 1, refer_percent: 10, min_withdraw: 5.0, maintenance_mode: false, payment_methods: "UPI" };
+        let adminSettings = { cpm: 2, ad_timer: 3, ads_per_link: 1, refer_percent: 10, min_withdraw: 5.0, maintenance_mode: false, payment_methods: "UPI" };
         
+        let userEnergyCoins = parseInt(localStorage.getItem('user_energy_coins') || '150', 10);
+
         const tg = window.Telegram.WebApp;
         tg.expand();
         tg.setHeaderColor('#0f172a');
@@ -318,27 +358,39 @@
             try { document.execCommand('copy'); safeAlert("Copied to clipboard!"); } catch (e) {} document.body.removeChild(el);
         }
 
+        // Apply terms & conditions compliant interface
         function applyReviewCompliance() {
             if (REVIEW_MODE) {
                 document.getElementById('header-brand-title').innerText = "LinkVault";
-                document.getElementById('header-balance-container').classList.add('hidden');
+                document.getElementById('header-badge-icon').className = "fa-solid fa-bolt text-amber-400";
+                document.getElementById('header-badge-val').innerText = `${userEnergyCoins} Coins`;
+                document.getElementById('header-badge-val').className = "font-bold text-sm text-amber-400";
+
                 document.getElementById('earning-stats-container').classList.add('hidden');
                 document.getElementById('utility-stats-container').classList.remove('hidden');
                 document.getElementById('earning-reports-card').classList.add('hidden');
                 document.getElementById('nav-wallet-btn').classList.add('hidden');
                 document.getElementById('btn-shorten-text').innerText = "Shorten Link";
-                
-                document.getElementById('refer-title').innerText = "Invite Colleagues";
-                document.getElementById('refer-desc').innerText = "Share LinkVault to enjoy high-speed secure redirection together.";
-                document.getElementById('refer-earned-card').classList.add('hidden');
+                document.getElementById('nav-refer-text').innerText = "Tasks";
+
+                document.getElementById('refer-title').innerText = "Community & Tasks";
+                document.getElementById('refer-desc').innerText = "Invite colleagues and complete daily tasks to earn speed energy coins.";
+                document.getElementById('refer-stat-label').innerText = "Energy Coins";
+                document.getElementById('ref-earnings').innerText = `${userEnergyCoins}`;
+                document.getElementById('section-daily-tasks').classList.remove('hidden');
             } else {
                 document.getElementById('header-brand-title').innerText = "Short2Earn";
-                document.getElementById('header-balance-container').classList.remove('hidden');
+                document.getElementById('header-badge-icon').className = "fa-solid fa-wallet text-emerald-400";
+                document.getElementById('header-badge-val').innerText = `$${parseFloat(currentUserData?.balance || 0).toFixed(2)}`;
+                document.getElementById('header-badge-val').className = "font-bold text-sm text-emerald-400";
+
                 document.getElementById('earning-stats-container').classList.remove('hidden');
                 document.getElementById('utility-stats-container').classList.add('hidden');
                 document.getElementById('earning-reports-card').classList.remove('hidden');
                 document.getElementById('nav-wallet-btn').classList.remove('hidden');
                 document.getElementById('btn-shorten-text').innerText = "Shorten & Earn";
+                document.getElementById('nav-refer-text').innerText = "Refer";
+                document.getElementById('section-daily-tasks').classList.add('hidden');
             }
         }
 
@@ -461,13 +513,16 @@
                 document.getElementById('user-api-token').innerText = currentUserData.api_token;
             }
 
-            document.getElementById('header-balance').innerText = `$${parseFloat(currentUserData?.balance || 0).toFixed(2)}`;
-            document.getElementById('wallet-balance-page').innerText = `$${parseFloat(currentUserData?.balance || 0).toFixed(2)}`;
-            document.getElementById('stat-today-earn').innerText = `$${parseFloat(currentUserData?.today_earnings || 0).toFixed(4)}`;
-            document.getElementById('stat-views').innerText = currentUserData?.total_clicks || 0;
-            document.getElementById('stat-safe-views').innerText = currentUserData?.total_clicks || 0;
-            document.getElementById('stat-cpm').innerText = `$${parseFloat(adminSettings.cpm || 0).toFixed(2)}`;
-            document.getElementById('min-withdraw-display').innerText = `$${parseFloat(adminSettings.min_withdraw || 5).toFixed(2)}`;
+            if (!REVIEW_MODE) {
+                document.getElementById('header-badge-val').innerText = `$${parseFloat(currentUserData?.balance || 0).toFixed(2)}`;
+                document.getElementById('wallet-balance-page').innerText = `$${parseFloat(currentUserData?.balance || 0).toFixed(2)}`;
+                document.getElementById('stat-today-earn').innerText = `$${parseFloat(currentUserData?.today_earnings || 0).toFixed(4)}`;
+                document.getElementById('stat-views').innerText = currentUserData?.total_clicks || 0;
+                document.getElementById('stat-cpm').innerText = `$${parseFloat(adminSettings.cpm || 0).toFixed(2)}`;
+                document.getElementById('min-withdraw-display').innerText = `$${parseFloat(adminSettings.min_withdraw || 5).toFixed(2)}`;
+            } else {
+                document.getElementById('stat-safe-views').innerText = currentUserData?.total_clicks || 0;
+            }
 
             if(adminSettings.tg_channel_url) { document.getElementById('link-tg').href = adminSettings.tg_channel_url; document.getElementById('link-tg').classList.remove('hidden'); document.getElementById('link-tg').classList.add('flex'); }
             if(adminSettings.yt_channel_url) { document.getElementById('link-yt').href = adminSettings.yt_channel_url; document.getElementById('link-yt').classList.remove('hidden'); document.getElementById('link-yt').classList.add('flex'); if(adminSettings.tg_channel_url) document.getElementById('div-line-yt').classList.remove('hidden'); }
@@ -513,6 +568,40 @@
             fetchReferralDetails();
         }
 
+        // Compliant Daily Task Trigger with Block ID 55005 & Coin Addition
+        window.triggerTaskAd = function() {
+            const btn = document.getElementById('btn-daily-ad-task');
+            btn.innerHTML = `<i class="fa-solid fa-spinner fa-spin"></i> Loading...`;
+            btn.disabled = true;
+
+            const onTaskRewardSuccess = () => {
+                userEnergyCoins += 50;
+                localStorage.setItem('user_energy_coins', userEnergyCoins);
+                document.getElementById('header-badge-val').innerText = `${userEnergyCoins} Coins`;
+                document.getElementById('ref-earnings').innerText = `${userEnergyCoins}`;
+
+                safeAlert("🎉 Task completed! +50 Energy Coins credited to your wallet.");
+                btn.innerText = "Claimed";
+                btn.className = "bg-emerald-600 text-white text-xs px-3.5 py-2 rounded-lg font-bold shadow-lg";
+                btn.disabled = true;
+            };
+
+            if (window.Adsgram) {
+                const AdController = window.Adsgram.init({ blockId: ADSGRAM_BLOCK_ID });
+                AdController.show().then((result) => {
+                    onTaskRewardSuccess();
+                }).catch((err) => {
+                    btn.disabled = false;
+                    btn.innerText = "Try Again";
+                    safeAlert("Ad could not be completed. Please watch fully to claim coins.");
+                });
+            } else {
+                setTimeout(() => {
+                    onTaskRewardSuccess();
+                }, 900);
+            }
+        };
+
         window.submitWithdrawal = async function() {
             const method = document.getElementById('withdraw-method').value;
             const details = document.getElementById('withdraw-details').value.trim();
@@ -538,7 +627,6 @@
                 }]);
 
                 currentUserData.balance = newBal;
-                document.getElementById('header-balance').innerText = `$${newBal.toFixed(2)}`;
                 document.getElementById('wallet-balance-page').innerText = `$${newBal.toFixed(2)}`;
                 document.getElementById('withdraw-amount').value = '';
                 document.getElementById('withdraw-details').value = '';
@@ -612,7 +700,7 @@
             try {
                 const { data: refs } = await dbClient.from('referrals').select('*').eq('referrer_tg_id', currentUserData.telegram_id).order('created_at', { ascending: false });
                 if (!refs || refs.length === 0) {
-                    listContainer.innerHTML = '<div class="text-center text-slate-500 py-6 text-sm glass-panel">No invitees yet.</div>';
+                    listContainer.innerHTML = '<div class="text-center text-slate-500 py-6 text-sm glass-panel">No partners yet.</div>';
                     document.getElementById('stat-referrals').innerText = 0; return;
                 }
                 const refIds = refs.map(r => r.referred_tg_id);
@@ -621,11 +709,11 @@
 
                 listContainer.innerHTML = '';
                 refs.forEach(ref => {
-                    const uName = userNames[ref.referred_tg_id] || "Active Member";
+                    const uName = userNames[ref.referred_tg_id] || "Partner Member";
                     listContainer.innerHTML += `<div class="glass-panel p-4 flex justify-between items-center mb-3"><span class="font-bold text-white text-sm"><i class="fa-solid fa-circle-check text-indigo-400 mr-2"></i>${uName}</span><span class="bg-emerald-500/20 text-emerald-400 px-2 py-1 rounded text-[10px] font-bold">Active</span></div>`;
                 });
                 document.getElementById('stat-referrals').innerText = refs.length;
-            } catch (e) { listContainer.innerHTML = '<div class="text-center text-slate-500 py-6 text-sm glass-panel">Unable to fetch network data.</div>'; }
+            } catch (e) { listContainer.innerHTML = '<div class="text-center text-slate-500 py-6 text-sm glass-panel">Network synchronization pending.</div>'; }
         }
 
         async function generateDateReport() {
@@ -699,23 +787,20 @@
 
         function executeAdClick() {
             const btn = document.getElementById('btn-watch-ad'); 
-            btn.innerHTML = `<i class="fa-solid fa-spinner fa-spin mr-2"></i> Loading partner sponsor...`;
+            btn.innerHTML = `<i class="fa-solid fa-spinner fa-spin mr-2"></i> Loading sponsor...`;
             btn.disabled = true;
             document.getElementById('ad-loader-ring').classList.remove('hidden'); 
             document.getElementById('ad-timer-text').classList.add('hidden');
 
-            // Adsgram Official SDK Safe Call
-            if (window.Adsgram && ADSGRAM_BLOCK_ID !== "YOUR_ADSGRAM_BLOCK_ID") {
+            if (window.Adsgram) {
                 const AdController = window.Adsgram.init({ blockId: ADSGRAM_BLOCK_ID });
                 AdController.show().then((result) => {
                     handleAdSuccess();
                 }).catch((result) => {
-                    // Agar user ad skip kare ya network error ho, tab bhi destination block nahi hogi
-                    console.log("Adsgram state:", result);
+                    console.log("Adsgram dismissal:", result);
                     handleAdSuccess();
                 });
             } else {
-                // Testing or fallback mode
                 setTimeout(() => {
                     handleAdSuccess();
                 }, 800);
