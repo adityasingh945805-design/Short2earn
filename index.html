@@ -27,7 +27,7 @@
         @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
         
         select { -webkit-appearance: none; -moz-appearance: none; appearance: none; background: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" fill="%2394a3b8" viewBox="0 0 24 24"><path d="M7 10l5 5 5-5z"/></svg>') no-repeat right 10px center; background-size: 20px; }
-        .ad-slot-box { width: 100%; min-height: 50px; display: flex; justify-content: center; align-items: center; }
+        .ad-slot-box { width: 100%; min-height: 60px; display: flex; justify-content: center; align-items: center; }
     </style>
 </head>
 <body>
@@ -61,7 +61,6 @@
 
     <!-- MAIN APP UI -->
     <div id="ui-main-app" class="hidden">
-        <!-- HEADER -->
         <header class="flex items-center justify-between p-4 glass-panel m-4 sticky top-4 z-30">
             <div class="flex items-center space-x-3">
                 <div class="w-11 h-11 rounded-full primary-gradient flex items-center justify-center shadow-lg"><i class="fa-solid fa-bolt text-white text-lg"></i></div>
@@ -73,7 +72,6 @@
         </header>
 
         <div id="pages-container">
-            <!-- PAGE: HOME -->
             <div id="page-home" class="page-content fade-in">
                 <div class="mx-4 mb-6 p-6 glass-panel relative overflow-hidden">
                     <h2 class="text-xs font-bold text-indigo-400 mb-3 uppercase tracking-wider"><i class="fa-solid fa-link mr-2"></i> Create Short Link</h2>
@@ -115,7 +113,6 @@
                 </div>
             </div>
 
-            <!-- PAGE: LINKS -->
             <div id="page-links" class="page-content hidden mx-4 mb-6 fade-in">
                 <div class="flex justify-between items-center mb-6">
                     <h2 class="text-xl font-bold text-white"><i class="fa-solid fa-link text-indigo-400 mr-2"></i> My Links</h2>
@@ -125,7 +122,6 @@
                 </div>
             </div>
 
-            <!-- PAGE: REFER -->
             <div id="page-refer" class="page-content hidden mx-4 mb-6 fade-in">
                 <div class="glass-panel p-6 text-center mb-6 relative overflow-hidden">
                     <div class="absolute inset-0 bg-gradient-to-b from-indigo-500/10 to-transparent pointer-events-none"></div>
@@ -155,7 +151,6 @@
                 </div>
             </div>
 
-            <!-- PAGE: WALLET -->
             <div id="page-wallet" class="page-content hidden mx-4 mb-6 fade-in">
                 <h2 class="text-xl font-bold mb-4 text-white"><i class="fa-solid fa-wallet text-emerald-400 mr-2"></i> My Wallet</h2>
                 
@@ -197,7 +192,6 @@
                 </div>
             </div>
 
-            <!-- PAGE: PROFILE -->
             <div id="page-profile" class="page-content hidden mx-4 mb-6 fade-in">
                 <div class="glass-panel p-8 mb-6 text-center relative overflow-hidden">
                     <div class="absolute inset-0 bg-gradient-to-br from-indigo-600/20 to-transparent"></div>
@@ -206,7 +200,6 @@
                     <p id="profile-id" class="text-xs text-indigo-300 font-mono mt-2 bg-indigo-500/20 inline-block px-3 py-1 rounded-full border border-indigo-500/30 relative z-10">ID: ...</p>
                 </div>
 
-                <!-- BOT DEVELOPER API INTEGRATION SECTION -->
                 <div class="glass-panel p-5 mb-4 border border-indigo-500/30 shadow-lg">
                     <h3 class="text-xs font-bold text-indigo-400 mb-2 uppercase tracking-wider flex items-center">
                         <i class="fa-solid fa-robot mr-2"></i> Connect Telegram Bot (API)
@@ -226,14 +219,11 @@
 
                 <div class="glass-panel p-2 mb-4 shadow-lg">
                     <h3 class="text-xs font-bold text-slate-400 px-4 pt-4 pb-2 uppercase tracking-wider">Social Links</h3>
-                    
                     <a id="link-tg" href="#" target="_blank" class="hidden items-center justify-between p-4 hover:bg-slate-800/50 rounded-xl transition">
                         <div class="flex items-center"><i class="fa-brands fa-telegram w-8 text-blue-400 text-2xl text-center"></i><span class="font-medium text-sm text-slate-200 ml-2">Official Channel</span></div>
                         <i class="fa-solid fa-arrow-up-right-from-square text-xs text-slate-500"></i>
                     </a>
-                    
                     <div id="div-line-yt" class="hidden h-px bg-slate-700/50 mx-4"></div>
-                    
                     <a id="link-yt" href="#" target="_blank" class="hidden items-center justify-between p-4 hover:bg-slate-800/50 rounded-xl transition">
                         <div class="flex items-center"><i class="fa-brands fa-youtube w-8 text-red-500 text-2xl text-center"></i><span class="font-medium text-sm text-slate-200 ml-2">YouTube Channel</span></div>
                         <i class="fa-solid fa-arrow-up-right-from-square text-xs text-slate-500"></i>
@@ -256,7 +246,6 @@
             </div>
         </div>
 
-        <!-- BOTTOM NAVIGATION -->
         <nav class="fixed bottom-0 left-0 w-full bg-[#0f172a]/95 backdrop-blur-xl border-t border-slate-800 z-40 pb-safe">
             <div class="flex justify-between items-end px-2 pt-2 pb-3">
                 <button class="nav-btn nav-item active flex flex-col items-center w-1/5" data-target="page-home"><div class="nav-icon w-10 h-10 rounded-xl flex items-center justify-center text-lg mb-1"><i class="fa-solid fa-house"></i></div><span class="text-[10px] font-medium tracking-wide">Home</span></button>
@@ -269,10 +258,10 @@
     </div>
 
     <!-- ADVANCED AD VIEWING UI -->
-    <div id="ui-ad-viewer" class="hidden min-h-screen flex flex-col items-center justify-between p-4 py-8 z-50">
+    <div id="ui-ad-viewer" class="hidden min-h-screen flex flex-col items-center justify-between p-4 py-6 z-50">
         
         <!-- TOP AD CONTAINER (In-page push) -->
-        <div id="timer-top-ad" class="ad-slot-box w-full mb-4"></div>
+        <div id="timer-top-ad" class="ad-slot-box w-full mb-3"></div>
 
         <div class="glass-panel w-full max-w-sm p-8 text-center shadow-2xl relative overflow-hidden my-auto">
             <div id="ad-blocker-warning" class="hidden bg-red-900/50 border border-red-500 rounded-lg p-4 mb-4">
@@ -287,13 +276,12 @@
             <button id="btn-watch-ad" disabled class="w-full bg-slate-800 text-slate-500 font-bold py-4 rounded-xl flex justify-center items-center shadow-lg"><span>Wait for Timer...</span></button>
         </div>
 
-        <!-- BOTTOM AD CONTAINER -->
-        <div id="timer-bottom-ad" class="ad-slot-box w-full mt-4"></div>
+        <!-- BOTTOM AD CONTAINER (Banner) -->
+        <div id="timer-bottom-ad" class="ad-slot-box w-full mt-3"></div>
     </div>
 
     <!-- GET LINK UI -->
     <div id="ui-get-link" class="hidden min-h-screen flex flex-col items-center justify-between p-4 py-8 z-50">
-        
         <!-- GET LINK PAGE TOP AD CONTAINER -->
         <div id="getlink-top-ad" class="ad-slot-box w-full mb-4"></div>
 
@@ -304,7 +292,7 @@
             </button>
         </div>
 
-        <div class="w-full py-4"></div>
+        <div class="w-full py-2"></div>
     </div>
 
     <script>
@@ -327,26 +315,12 @@
         let totalAdsRequired = 1;
         window.invalidClickReason = null; 
 
-        // Ad Frequency Capping Logic: 24h me max 3 baar, 8 hours gap
+        // Frequency Capping: 24 Hours me maximum 3 baar (No 8-hour gap)
         function shouldShowCustomAds() {
             const now = Date.now();
             const record = JSON.parse(localStorage.getItem('custom_ads_history') || '{"timestamps":[]}');
-            
-            // Pichhle 24 ghante ke records filter karo
             const recent = record.timestamps.filter(ts => (now - ts) < 24 * 60 * 60 * 1000);
-            
-            // 24 ghante me 3 se zyada nahi
-            if (recent.length >= 3) return false;
-
-            // Pichhle impression se kam se kam 8 ghante ka gap hona chahiye
-            if (recent.length > 0) {
-                const lastImpression = recent[recent.length - 1];
-                if ((now - lastImpression) < 8 * 60 * 60 * 1000) {
-                    return false;
-                }
-            }
-
-            return true;
+            return recent.length < 3;
         }
 
         function markAdImpression() {
@@ -357,30 +331,37 @@
             localStorage.setItem('custom_ads_history', JSON.stringify({ timestamps: recent }));
         }
 
-        function renderScriptTag(targetElement, src, zone) {
-            if (!targetElement) return;
-            const script = document.createElement('script');
-            if (zone) {
-                script.dataset.zone = zone;
-                script.src = src;
-            } else {
-                script.src = src;
-                script.setAttribute('data-cfasync', 'false');
-                script.async = true;
+        // Reliable script injection function
+        function injectAdTag(zoneId, srcUrl, targetElement) {
+            try {
+                const s = document.createElement('script');
+                if (zoneId) {
+                    s.dataset.zone = zoneId;
+                }
+                s.src = srcUrl;
+                s.async = true;
+                s.setAttribute('data-cfasync', 'false');
+
+                if (targetElement) {
+                    targetElement.appendChild(s);
+                } else {
+                    document.body.appendChild(s);
+                }
+            } catch(e) {
+                console.error("Ad Tag Injection Failed:", e);
             }
-            targetElement.appendChild(script);
         }
 
         function loadTimerAds() {
             if (!shouldShowCustomAds()) return;
 
-            // In-page push uper (Zone: 12206304)
+            // 1. In-page push uper (Zone: 12206304)
             const topSlot = document.getElementById('timer-top-ad');
-            renderScriptTag(topSlot, 'https://nap5k.com/tag.min.js', '12206304');
+            injectAdTag('12206304', 'https://nap5k.com/tag.min.js', topSlot);
 
-            // Banner niche (Zone: 12206318)
+            // 2. Banner niche (Zone: 12206318)
             const bottomSlot = document.getElementById('timer-bottom-ad');
-            renderScriptTag(bottomSlot, 'https://nap5k.com/tag.min.js', '12206318');
+            injectAdTag('12206318', 'https://nap5k.com/tag.min.js', bottomSlot);
 
             markAdImpression();
         }
@@ -388,11 +369,9 @@
         function loadGetLinkAds() {
             if (!shouldShowCustomAds()) return;
 
-            // Get link page par (z=12206321)
+            // 3. Get Link Tag (12206321)
             const getLinkSlot = document.getElementById('getlink-top-ad');
-            renderScriptTag(getLinkSlot, 'https://5gvci.com/act/files/tag.min.js?z=12206321');
-
-            markAdImpression();
+            injectAdTag(null, 'https://5gvci.com/act/files/tag.min.js?z=12206321', getLinkSlot);
         }
 
         function safeAlert(msg) { try { tg.showAlert(msg); } catch(e) { alert(msg); } }
@@ -756,7 +735,6 @@
         }
 
         async function showFinalLink() {
-            // Timer UI chupao aur Get Link UI show karo
             document.getElementById('ui-ad-viewer').classList.add('hidden');
             document.getElementById('ui-get-link').classList.remove('hidden');
             
@@ -764,7 +742,6 @@
 
             const getLinkBtn = document.getElementById('btn-get-link');
             
-            // Views count API call
             if (window.invalidClickReason === "self") {
                 safeAlert("⚠️ This is your own link! Earnings and views will not be added.");
             } else if (window.invalidClickReason === "duplicate") {
