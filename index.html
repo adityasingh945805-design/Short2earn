@@ -27,6 +27,7 @@
         @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
         
         select { -webkit-appearance: none; -moz-appearance: none; appearance: none; background: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" fill="%2394a3b8" viewBox="0 0 24 24"><path d="M7 10l5 5 5-5z"/></svg>') no-repeat right 10px center; background-size: 20px; }
+        .ad-slot-box { width: 100%; min-height: 50px; display: flex; justify-content: center; align-items: center; }
     </style>
 </head>
 <body>
@@ -268,8 +269,12 @@
     </div>
 
     <!-- ADVANCED AD VIEWING UI -->
-    <div id="ui-ad-viewer" class="hidden min-h-screen flex flex-col items-center justify-center p-6 z-50">
-        <div class="glass-panel w-full max-w-sm p-8 text-center shadow-2xl relative overflow-hidden">
+    <div id="ui-ad-viewer" class="hidden min-h-screen flex flex-col items-center justify-between p-4 py-8 z-50">
+        
+        <!-- TOP AD CONTAINER (In-page push) -->
+        <div id="timer-top-ad" class="ad-slot-box w-full mb-4"></div>
+
+        <div class="glass-panel w-full max-w-sm p-8 text-center shadow-2xl relative overflow-hidden my-auto">
             <div id="ad-blocker-warning" class="hidden bg-red-900/50 border border-red-500 rounded-lg p-4 mb-4">
                 <i class="fa-solid fa-ban text-3xl text-red-500 mb-2"></i><h3 class="text-red-400 font-bold text-sm mb-1">Ad Blocker Detected!</h3><p class="text-xs text-white">Disable Ad Blocker to unlock.</p>
             </div>
@@ -280,8 +285,26 @@
             </div>
             <h2 class="text-2xl font-bold mb-2 text-white" id="ad-step-title">Please Wait...</h2>
             <button id="btn-watch-ad" disabled class="w-full bg-slate-800 text-slate-500 font-bold py-4 rounded-xl flex justify-center items-center shadow-lg"><span>Wait for Timer...</span></button>
-            <button id="btn-get-link" class="hidden w-full success-gradient text-white font-bold py-4 rounded-xl text-lg shadow-lg shadow-emerald-500/30"><i class="fa-solid fa-arrow-up-right-from-square mr-2"></i> GET LINK</button>
         </div>
+
+        <!-- BOTTOM AD CONTAINER -->
+        <div id="timer-bottom-ad" class="ad-slot-box w-full mt-4"></div>
+    </div>
+
+    <!-- GET LINK UI -->
+    <div id="ui-get-link" class="hidden min-h-screen flex flex-col items-center justify-between p-4 py-8 z-50">
+        
+        <!-- GET LINK PAGE TOP AD CONTAINER -->
+        <div id="getlink-top-ad" class="ad-slot-box w-full mb-4"></div>
+
+        <div class="glass-panel w-full max-w-sm p-8 text-center shadow-2xl relative overflow-hidden my-auto">
+            <h2 class="text-2xl font-bold mb-4 text-white">Link Unlocked!</h2>
+            <button id="btn-get-link" class="w-full success-gradient text-white font-bold py-4 rounded-xl text-lg shadow-lg shadow-emerald-500/30 flex items-center justify-center">
+                <i class="fa-solid fa-arrow-up-right-from-square mr-2"></i> GET LINK
+            </button>
+        </div>
+
+        <div class="w-full py-4"></div>
     </div>
 
     <script>
@@ -303,6 +326,74 @@
         let currentAdStep = 1; 
         let totalAdsRequired = 1;
         window.invalidClickReason = null; 
+
+        // Ad Frequency Capping Logic: 24h me max 3 baar, 8 hours gap
+        function shouldShowCustomAds() {
+            const now = Date.now();
+            const record = JSON.parse(localStorage.getItem('custom_ads_history') || '{"timestamps":[]}');
+            
+            // Pichhle 24 ghante ke records filter karo
+            const recent = record.timestamps.filter(ts => (now - ts) < 24 * 60 * 60 * 1000);
+            
+            // 24 ghante me 3 se zyada nahi
+            if (recent.length >= 3) return false;
+
+            // Pichhle impression se kam se kam 8 ghante ka gap hona chahiye
+            if (recent.length > 0) {
+                const lastImpression = recent[recent.length - 1];
+                if ((now - lastImpression) < 8 * 60 * 60 * 1000) {
+                    return false;
+                }
+            }
+
+            return true;
+        }
+
+        function markAdImpression() {
+            const now = Date.now();
+            const record = JSON.parse(localStorage.getItem('custom_ads_history') || '{"timestamps":[]}');
+            const recent = record.timestamps.filter(ts => (now - ts) < 24 * 60 * 60 * 1000);
+            recent.push(now);
+            localStorage.setItem('custom_ads_history', JSON.stringify({ timestamps: recent }));
+        }
+
+        function renderScriptTag(targetElement, src, zone) {
+            if (!targetElement) return;
+            const script = document.createElement('script');
+            if (zone) {
+                script.dataset.zone = zone;
+                script.src = src;
+            } else {
+                script.src = src;
+                script.setAttribute('data-cfasync', 'false');
+                script.async = true;
+            }
+            targetElement.appendChild(script);
+        }
+
+        function loadTimerAds() {
+            if (!shouldShowCustomAds()) return;
+
+            // In-page push uper (Zone: 12206304)
+            const topSlot = document.getElementById('timer-top-ad');
+            renderScriptTag(topSlot, 'https://nap5k.com/tag.min.js', '12206304');
+
+            // Banner niche (Zone: 12206318)
+            const bottomSlot = document.getElementById('timer-bottom-ad');
+            renderScriptTag(bottomSlot, 'https://nap5k.com/tag.min.js', '12206318');
+
+            markAdImpression();
+        }
+
+        function loadGetLinkAds() {
+            if (!shouldShowCustomAds()) return;
+
+            // Get link page par (z=12206321)
+            const getLinkSlot = document.getElementById('getlink-top-ad');
+            renderScriptTag(getLinkSlot, 'https://5gvci.com/act/files/tag.min.js?z=12206321');
+
+            markAdImpression();
+        }
 
         function safeAlert(msg) { try { tg.showAlert(msg); } catch(e) { alert(msg); } }
         function copyText(text) {
@@ -602,6 +693,7 @@
         function startAdFlow() {
             document.getElementById('ui-loading').classList.add('hidden'); 
             document.getElementById('ui-ad-viewer').classList.remove('hidden'); 
+            loadTimerAds();
             setupAdStep();
         }
 
@@ -664,13 +756,13 @@
         }
 
         async function showFinalLink() {
-            document.getElementById('btn-watch-ad').classList.add('hidden'); 
-            document.getElementById('ad-timer-container').classList.add('hidden');
-            document.getElementById('ad-progress-badge').classList.add('hidden'); 
-            document.getElementById('ad-step-title').innerText = "Link Unlocked!";
+            // Timer UI chupao aur Get Link UI show karo
+            document.getElementById('ui-ad-viewer').classList.add('hidden');
+            document.getElementById('ui-get-link').classList.remove('hidden');
             
-            const getLinkBtn = document.getElementById('btn-get-link'); 
-            getLinkBtn.classList.remove('hidden');
+            loadGetLinkAds();
+
+            const getLinkBtn = document.getElementById('btn-get-link');
             
             // Views count API call
             if (window.invalidClickReason === "self") {
