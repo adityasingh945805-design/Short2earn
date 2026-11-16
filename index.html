@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Short2Earn - Mini App</title>
+    <title>Mynexify - Link Utility Dashboard</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
@@ -31,7 +31,7 @@
     <!-- LOADING SCREEN -->
     <div id="ui-loading" class="fixed inset-0 flex flex-col items-center justify-center bg-[#0f172a] z-50">
         <i class="fa-solid fa-bolt text-5xl text-indigo-500 mb-4 animate-pulse"></i>
-        <h2 class="text-2xl font-bold text-white mb-2" id="loading-title">Short2Earn</h2>
+        <h2 class="text-2xl font-bold text-white mb-2" id="loading-title">Mynexify</h2>
         <p class="text-slate-400 text-sm" id="loading-text">Connecting to servers...</p>
     </div>
 
@@ -49,9 +49,9 @@
     <div id="warning-popup" class="fixed inset-0 z-[60] bg-[#0f172a]/90 backdrop-blur-sm flex items-center justify-center hidden fade-in">
         <div class="glass-panel p-6 m-4 max-w-sm text-center border border-red-500/50 shadow-2xl shadow-red-500/20">
             <div class="w-16 h-16 bg-red-500/20 rounded-full mx-auto flex items-center justify-center mb-4"><i class="fa-solid fa-triangle-exclamation text-3xl text-red-500"></i></div>
-            <h2 class="text-xl font-bold text-white mb-2">Important Rules!</h2>
-            <p class="text-sm text-slate-300 mb-6"><span class="text-red-400 font-bold">1.</span> NO VPN Allowed.<br><span class="text-red-400 font-bold">2.</span> NO Self-Clicking.<br><br>Violations will result in an instant <span class="font-bold text-red-400">Account BAN</span> without payout.</p>
-            <button onclick="document.getElementById('warning-popup').classList.add('hidden')" class="w-full bg-red-600 hover:bg-red-500 text-white font-bold py-3 rounded-xl transition-all">I Agree</button>
+            <h2 class="text-xl font-bold text-white mb-2">Important Guidelines</h2>
+            <p class="text-sm text-slate-300 mb-6"><span class="text-red-400 font-bold">1.</span> No proxy or VPN routing.<br><span class="text-red-400 font-bold">2.</span> Automated interactions prohibited.<br><br>Compliance violations will result in account suspension.</p>
+            <button onclick="document.getElementById('warning-popup').classList.add('hidden')" class="w-full bg-indigo-600 hover:bg-indigo-500 text-white font-bold py-3 rounded-xl transition-all">I Understand</button>
         </div>
     </div>
 
@@ -59,8 +59,8 @@
     <div id="ui-main-app" class="hidden">
         <header class="flex items-center justify-between p-4 glass-panel m-4 sticky top-4 z-30">
             <div class="flex items-center space-x-3">
-                <div class="w-11 h-11 rounded-full primary-gradient flex items-center justify-center shadow-lg"><i class="fa-solid fa-bolt text-white text-lg"></i></div>
-                <div><h1 class="font-bold text-lg text-white leading-tight">Short2Earn</h1><p class="text-[11px] text-indigo-300" id="user-greeting">Loading...</p></div>
+                <div class="w-11 h-11 rounded-full primary-gradient flex items-center justify-center shadow-lg"><i class="fa-solid fa-link text-white text-lg"></i></div>
+                <div><h1 class="font-bold text-lg text-white leading-tight">Mynexify</h1><p class="text-[11px] text-indigo-300" id="user-greeting">Loading...</p></div>
             </div>
             <div class="flex items-center space-x-2 bg-slate-800/80 py-2 px-4 rounded-full border border-slate-700 shadow-inner">
                 <i class="fa-solid fa-wallet text-emerald-400"></i><span class="font-bold text-sm text-emerald-400" id="header-balance">$0.00</span>
@@ -70,10 +70,10 @@
         <div id="pages-container">
             <div id="page-home" class="page-content fade-in">
                 <div class="mx-4 mb-6 p-6 glass-panel relative overflow-hidden">
-                    <h2 class="text-xs font-bold text-indigo-400 mb-3 uppercase tracking-wider"><i class="fa-solid fa-link mr-2"></i> Create Short Link</h2>
-                    <input type="url" id="long-url-input" placeholder="Paste your long URL here..." class="w-full bg-slate-900/80 border border-slate-700 text-white rounded-xl p-4 mb-4 focus:outline-none focus:border-indigo-500 transition-colors text-sm shadow-inner">
+                    <h2 class="text-xs font-bold text-indigo-400 mb-3 uppercase tracking-wider"><i class="fa-solid fa-wand-magic-sparkles mr-2"></i> Create Managed Link</h2>
+                    <input type="url" id="long-url-input" placeholder="Paste your destination URL here..." class="w-full bg-slate-900/80 border border-slate-700 text-white rounded-xl p-4 mb-4 focus:outline-none focus:border-indigo-500 transition-colors text-sm shadow-inner">
                     <button id="btn-shorten" class="w-full primary-gradient hover:opacity-90 text-white font-bold py-4 rounded-xl flex items-center justify-center space-x-2 shadow-lg shadow-indigo-500/25 transition-transform active:scale-95">
-                        <i class="fa-solid fa-wand-magic-sparkles"></i><span>Shorten & Earn</span>
+                        <i class="fa-solid fa-link"></i><span>Generate Link</span>
                     </button>
                     <div id="shorten-result" class="hidden mt-5 p-2 bg-gradient-to-r from-emerald-500/20 to-teal-500/20 border border-emerald-500/30 rounded-xl">
                         <div class="flex justify-between items-center bg-slate-900 rounded-lg p-3">
@@ -86,32 +86,32 @@
                 <div class="grid grid-cols-2 gap-4 mx-4 mb-6">
                     <div class="glass-panel p-5 text-center relative overflow-hidden">
                         <div class="absolute -right-3 -bottom-3 opacity-5"><i class="fa-solid fa-chart-line text-6xl"></i></div>
-                        <div class="text-slate-400 text-xs mb-1 uppercase font-semibold">Today's Earn</div><div class="text-2xl font-bold text-emerald-400" id="stat-today-earn">$0.00</div>
+                        <div class="text-slate-400 text-xs mb-1 uppercase font-semibold">Today's Revenue</div><div class="text-2xl font-bold text-emerald-400" id="stat-today-earn">$0.00</div>
                     </div>
                     <div class="glass-panel p-5 text-center relative overflow-hidden">
                         <div class="absolute -right-3 -bottom-3 opacity-5"><i class="fa-solid fa-eye text-6xl"></i></div>
-                        <div class="text-slate-400 text-xs mb-1 uppercase font-semibold">Total Views</div><div class="text-2xl font-bold text-white" id="stat-views">0</div>
+                        <div class="text-slate-400 text-xs mb-1 uppercase font-semibold">Total Clicks</div><div class="text-2xl font-bold text-white" id="stat-views">0</div>
                     </div>
                     <div class="glass-panel p-5 col-span-2 flex justify-between items-center bg-gradient-to-r from-slate-800 to-indigo-900/30">
-                        <div><div class="text-indigo-300 text-xs font-bold uppercase mb-1">Global CPM Rate</div><div class="text-[10px] text-slate-400">Valid for all countries</div></div>
+                        <div><div class="text-indigo-300 text-xs font-bold uppercase mb-1">Global CPM Rate</div><div class="text-[10px] text-slate-400">Standard tier payout</div></div>
                         <div class="text-3xl font-bold text-indigo-400" id="stat-cpm">$0.00</div>
                     </div>
                 </div>
 
                 <div class="mx-4 mb-6 p-5 glass-panel">
                     <div class="flex justify-between items-center mb-4 border-b border-slate-700 pb-3">
-                        <h3 class="font-bold text-sm text-white"><i class="fa-solid fa-calendar-days mr-2 text-indigo-400"></i> Daily Report</h3>
+                        <h3 class="font-bold text-sm text-white"><i class="fa-solid fa-calendar-days mr-2 text-indigo-400"></i> Analytics Report</h3>
                         <input type="month" id="report-month" class="bg-slate-900 border border-slate-700 text-xs text-white rounded p-1.5 focus:outline-none focus:border-indigo-500">
                     </div>
                     <div id="earnings-list" class="space-y-2 max-h-60 overflow-y-auto pr-2">
-                        <div class="text-center text-slate-500 py-6 text-xs">Loading data...</div>
+                        <div class="text-center text-slate-500 py-6 text-xs">Loading analytics...</div>
                     </div>
                 </div>
             </div>
 
             <div id="page-links" class="page-content hidden mx-4 mb-6 fade-in">
                 <div class="flex justify-between items-center mb-6">
-                    <h2 class="text-xl font-bold text-white"><i class="fa-solid fa-link text-indigo-400 mr-2"></i> My Links</h2>
+                    <h2 class="text-xl font-bold text-white"><i class="fa-solid fa-link text-indigo-400 mr-2"></i> Managed Links</h2>
                 </div>
                 <div id="links-list" class="space-y-4">
                     <div class="text-center text-slate-500 py-10"><i class="fa-solid fa-circle-notch fa-spin text-2xl mb-2 block"></i> Loading...</div>
@@ -122,8 +122,8 @@
                 <div class="glass-panel p-6 text-center mb-6 relative overflow-hidden">
                     <div class="absolute inset-0 bg-gradient-to-b from-indigo-500/10 to-transparent pointer-events-none"></div>
                     <div class="w-20 h-20 rounded-full bg-slate-800 border border-indigo-500/30 mx-auto flex items-center justify-center mb-4 text-3xl text-indigo-400 relative z-10 shadow-lg shadow-indigo-500/20"><i class="fa-solid fa-users"></i></div>
-                    <h2 class="text-2xl font-bold text-white mb-2">Invite Friends</h2>
-                    <p class="text-sm text-slate-300 mb-6">Earn a lifetime <span class="text-emerald-400 font-bold bg-emerald-500/10 px-2 rounded" id="refer-commission">10%</span> commission from your friends' earnings!</p>
+                    <h2 class="text-2xl font-bold text-white mb-2">Affiliate Program</h2>
+                    <p class="text-sm text-slate-300 mb-6">Earn a lifetime <span class="text-emerald-400 font-bold bg-emerald-500/10 px-2 rounded" id="refer-commission">10%</span> commission from your network's activity!</p>
                     <div class="bg-slate-900 rounded-xl p-2 flex items-center justify-between border border-slate-700">
                         <span id="referral-link-display" class="text-xs font-mono text-slate-300 truncate px-3 w-[75%]">Generating...</span>
                         <button id="btn-copy-referral" class="primary-gradient text-white px-5 py-2.5 rounded-lg text-sm font-bold shadow-lg active:scale-95 transition-transform">Copy</button>
@@ -136,44 +136,44 @@
                         <div class="text-3xl font-bold text-white" id="stat-referrals">0</div>
                     </div>
                     <div class="glass-panel p-5 text-center border border-emerald-500/30 bg-emerald-900/10">
-                        <div class="text-emerald-400 text-xs mb-2 uppercase font-semibold">Total Earned</div>
+                        <div class="text-emerald-400 text-xs mb-2 uppercase font-semibold">Affiliate Earnings</div>
                         <div class="text-3xl font-bold text-emerald-400" id="ref-earnings">$0.00</div>
                     </div>
                 </div>
 
-                <h3 class="text-sm font-bold text-white mb-3 px-2 flex items-center"><i class="fa-solid fa-list-check mr-2 text-indigo-400"></i> Referrals List</h3>
+                <h3 class="text-sm font-bold text-white mb-3 px-2 flex items-center"><i class="fa-solid fa-list-check mr-2 text-indigo-400"></i> Referral Network</h3>
                 <div id="referrals-list" class="space-y-3">
                     <div class="text-center text-slate-500 py-6 text-sm glass-panel">Loading details...</div>
                 </div>
             </div>
 
             <div id="page-wallet" class="page-content hidden mx-4 mb-6 fade-in">
-                <h2 class="text-xl font-bold mb-4 text-white"><i class="fa-solid fa-wallet text-emerald-400 mr-2"></i> My Wallet</h2>
+                <h2 class="text-xl font-bold mb-4 text-white"><i class="fa-solid fa-wallet text-emerald-400 mr-2"></i> Account Balance</h2>
                 
                 <div class="glass-panel p-8 mb-6 text-center border border-emerald-500/30 bg-gradient-to-br from-emerald-900/20 to-transparent relative overflow-hidden">
                     <i class="fa-solid fa-coins absolute -right-6 -bottom-6 text-8xl text-emerald-500/10"></i>
                     <div class="text-sm text-emerald-200 mb-2 font-medium">Available Balance</div>
                     <div class="text-5xl font-bold text-white mb-2" id="wallet-balance-page">$0.00</div>
-                    <div class="text-xs text-slate-400 mb-6">Minimum Withdrawal: <span id="min-withdraw-display" class="font-bold text-white">$5.00</span></div>
+                    <div class="text-xs text-slate-400 mb-6">Minimum Payout Threshold: <span id="min-withdraw-display" class="font-bold text-white">$5.00</span></div>
                 </div>
 
                 <div class="glass-panel p-6 mb-6 border border-slate-700">
-                    <h3 class="font-bold text-sm text-white mb-4 uppercase tracking-wider border-b border-slate-700 pb-2">Request Payout</h3>
+                    <h3 class="font-bold text-sm text-white mb-4 uppercase tracking-wider border-b border-slate-700 pb-2">Request Withdrawal</h3>
                     
                     <div class="mb-4">
-                        <label class="block text-xs font-bold text-slate-400 mb-2">Select Payment Method</label>
+                        <label class="block text-xs font-bold text-slate-400 mb-2">Select Payout Method</label>
                         <select id="withdraw-method" class="w-full bg-slate-900 border border-slate-700 text-white rounded-lg p-3 text-sm focus:outline-none focus:border-indigo-500">
                             <option value="">Loading methods...</option>
                         </select>
                     </div>
 
                     <div class="mb-4">
-                        <label class="block text-xs font-bold text-slate-400 mb-2">Payment Details (UPI/Address/Number)</label>
+                        <label class="block text-xs font-bold text-slate-400 mb-2">Account Details (UPI/Address/Number)</label>
                         <input type="text" id="withdraw-details" placeholder="Enter valid details..." class="w-full bg-slate-900 border border-slate-700 text-white rounded-lg p-3 text-sm focus:outline-none focus:border-indigo-500">
                     </div>
 
                     <div class="mb-6">
-                        <label class="block text-xs font-bold text-slate-400 mb-2">Amount to Withdraw ($)</label>
+                        <label class="block text-xs font-bold text-slate-400 mb-2">Amount ($)</label>
                         <input type="number" step="0.01" id="withdraw-amount" placeholder="0.00" class="w-full bg-slate-900 border border-slate-700 text-white rounded-lg p-3 text-sm focus:outline-none focus:border-indigo-500">
                     </div>
 
@@ -182,7 +182,7 @@
                     </button>
                 </div>
 
-                <h3 class="font-bold text-sm text-slate-300 mb-3 px-2"><i class="fa-solid fa-clock-rotate-left mr-2"></i> Payout History</h3>
+                <h3 class="font-bold text-sm text-slate-300 mb-3 px-2"><i class="fa-solid fa-clock-rotate-left mr-2"></i> Transaction History</h3>
                 <div id="withdrawal-history-list" class="space-y-3">
                     <div class="glass-panel p-6 text-center text-slate-500 text-xs">No transactions yet.</div>
                 </div>
@@ -198,9 +198,9 @@
 
                 <div class="glass-panel p-5 mb-4 border border-indigo-500/30 shadow-lg">
                     <h3 class="text-xs font-bold text-indigo-400 mb-2 uppercase tracking-wider flex items-center">
-                        <i class="fa-solid fa-robot mr-2"></i> Connect Telegram Bot (API)
+                        <i class="fa-solid fa-robot mr-2"></i> Bot Integration (API)
                     </h3>
-                    <p class="text-[11px] text-slate-300 mb-3">Apne bot me is API Key ko connect karein taaki links direct convert hon:</p>
+                    <p class="text-[11px] text-slate-300 mb-3">Connect your bot API key for automated link generation:</p>
                     
                     <div class="bg-slate-900 rounded-lg p-2.5 flex items-center justify-between border border-slate-700 mb-3">
                         <span id="user-api-token" class="text-xs font-mono text-emerald-400 truncate w-[75%]">Loading API Key...</span>
@@ -214,20 +214,20 @@
                 </div>
 
                 <div class="glass-panel p-2 mb-4 shadow-lg">
-                    <h3 class="text-xs font-bold text-slate-400 px-4 pt-4 pb-2 uppercase tracking-wider">Social Links</h3>
+                    <h3 class="text-xs font-bold text-slate-400 px-4 pt-4 pb-2 uppercase tracking-wider">Resources</h3>
                     <a id="link-tg" href="#" target="_blank" class="hidden items-center justify-between p-4 hover:bg-slate-800/50 rounded-xl transition">
                         <div class="flex items-center"><i class="fa-brands fa-telegram w-8 text-blue-400 text-2xl text-center"></i><span class="font-medium text-sm text-slate-200 ml-2">Official Channel</span></div>
                         <i class="fa-solid fa-arrow-up-right-from-square text-xs text-slate-500"></i>
                     </a>
                     <div id="div-line-yt" class="hidden h-px bg-slate-700/50 mx-4"></div>
                     <a id="link-yt" href="#" target="_blank" class="hidden items-center justify-between p-4 hover:bg-slate-800/50 rounded-xl transition">
-                        <div class="flex items-center"><i class="fa-brands fa-youtube w-8 text-red-500 text-2xl text-center"></i><span class="font-medium text-sm text-slate-200 ml-2">YouTube Channel</span></div>
+                        <div class="flex items-center"><i class="fa-brands fa-youtube w-8 text-red-500 text-2xl text-center"></i><span class="font-medium text-sm text-slate-200 ml-2">Tutorials</span></div>
                         <i class="fa-solid fa-arrow-up-right-from-square text-xs text-slate-500"></i>
                     </a>
                 </div>
 
                 <div class="glass-panel p-2 mb-4 shadow-lg">
-                    <h3 class="text-xs font-bold text-slate-400 px-4 pt-4 pb-2 uppercase tracking-wider">Legal</h3>
+                    <h3 class="text-xs font-bold text-slate-400 px-4 pt-4 pb-2 uppercase tracking-wider">Legal Compliance</h3>
                     <a id="link-privacy" href="#" target="_blank" class="hidden items-center justify-between p-4 hover:bg-slate-800/50 rounded-xl transition">
                         <div class="flex items-center"><i class="fa-solid fa-shield-halved w-8 text-slate-400 text-lg text-center"></i><span class="text-sm text-slate-300 ml-2">Privacy Policy</span></div>
                         <i class="fa-solid fa-chevron-right text-xs text-slate-600"></i>
@@ -238,7 +238,7 @@
                     </a>
                 </div>
 
-                <div class="text-center text-[10px] text-slate-500 mt-8 mb-2">Powered by <span class="font-bold text-indigo-400">Short2Earn</span></div>
+                <div class="text-center text-[10px] text-slate-500 mt-8 mb-2">Powered by <span class="font-bold text-indigo-400">Mynexify</span></div>
             </div>
         </div>
 
@@ -246,7 +246,7 @@
             <div class="flex justify-between items-end px-2 pt-2 pb-3">
                 <button class="nav-btn nav-item active flex flex-col items-center w-1/5" data-target="page-home"><div class="nav-icon w-10 h-10 rounded-xl flex items-center justify-center text-lg mb-1"><i class="fa-solid fa-house"></i></div><span class="text-[10px] font-medium tracking-wide">Home</span></button>
                 <button class="nav-btn nav-item flex flex-col items-center w-1/5" data-target="page-links"><div class="nav-icon w-10 h-10 rounded-xl flex items-center justify-center text-lg mb-1"><i class="fa-solid fa-link"></i></div><span class="text-[10px] font-medium tracking-wide">Links</span></button>
-                <button class="nav-btn nav-item flex flex-col items-center w-1/5" data-target="page-refer"><div class="nav-icon w-10 h-10 rounded-xl flex items-center justify-center text-lg mb-1"><i class="fa-solid fa-users"></i></div><span class="text-[10px] font-medium tracking-wide">Refer</span></button>
+                <button class="nav-btn nav-item flex flex-col items-center w-1/5" data-target="page-refer"><div class="nav-icon w-10 h-10 rounded-xl flex items-center justify-center text-lg mb-1"><i class="fa-solid fa-users"></i></div><span class="text-[10px] font-medium tracking-wide">Affiliate</span></button>
                 <button class="nav-btn nav-item flex flex-col items-center w-1/5" data-target="page-wallet"><div class="nav-icon w-10 h-10 rounded-xl flex items-center justify-center text-lg mb-1"><i class="fa-solid fa-wallet"></i></div><span class="text-[10px] font-medium tracking-wide">Wallet</span></button>
                 <button class="nav-btn nav-item flex flex-col items-center w-1/5" data-target="page-profile"><div class="nav-icon w-10 h-10 rounded-xl flex items-center justify-center text-lg mb-1"><i class="fa-solid fa-user"></i></div><span class="text-[10px] font-medium tracking-wide">Profile</span></button>
             </div>
@@ -257,12 +257,12 @@
     <div id="ui-ad-viewer" class="hidden min-h-screen flex flex-col items-center justify-between p-4 py-8 z-50">
         <div class="glass-panel w-full max-w-sm p-8 text-center shadow-2xl relative overflow-hidden my-auto">
             <div class="w-20 h-20 bg-indigo-500/20 rounded-full mx-auto flex items-center justify-center mb-6 text-indigo-400 text-3xl shadow-lg shadow-indigo-500/20">
-                <i class="fa-solid fa-gift"></i>
+                <i class="fa-solid fa-shield-halved"></i>
             </div>
             <h2 class="text-2xl font-bold mb-2 text-white">Unlock Destination Link</h2>
-            <p class="text-sm text-slate-300 mb-6">Click below to watch a short sponsored message and instantly access your requested link.</p>
+            <p class="text-sm text-slate-300 mb-6">Click below to view the sponsored message and instantly access your requested URL.</p>
             <button id="btn-watch-ad" onclick="executeAdClick()" class="w-full primary-gradient hover:opacity-90 text-white font-bold py-4 rounded-xl flex justify-center items-center space-x-2 shadow-lg shadow-indigo-500/30 transition-transform active:scale-95">
-                <i class="fa-solid fa-play"></i><span>Watch Ad & Unlock</span>
+                <i class="fa-solid fa-play"></i><span>Continue to Link</span>
             </button>
         </div>
     </div>
@@ -272,7 +272,7 @@
         <div class="glass-panel w-full max-w-sm p-8 text-center shadow-2xl relative overflow-hidden my-auto">
             <h2 class="text-2xl font-bold mb-4 text-white">Link Unlocked!</h2>
             <button id="btn-get-link" class="w-full success-gradient text-white font-bold py-4 rounded-xl text-lg shadow-lg shadow-emerald-500/30 flex items-center justify-center">
-                <i class="fa-solid fa-arrow-up-right-from-square mr-2"></i> GET LINK
+                <i class="fa-solid fa-arrow-up-right-from-square mr-2"></i> PROCEED TO URL
             </button>
         </div>
         <div class="w-full py-2"></div>
@@ -339,7 +339,7 @@
                 if (tg.initDataUnsafe?.user) {
                     const user = tg.initDataUnsafe.user;
                     let { data: existUser } = await dbClient.from('users').select('*').eq('telegram_id', user.id).maybeSingle();
-                    if (existUser && existUser.is_blocked) return document.getElementById('loading-title').innerText = "Account Blocked";
+                    if (existUser && existUser.is_blocked) return document.getElementById('loading-title').innerText = "Account Suspended";
 
                     if (!existUser) {
                         const randomToken = Math.random().toString(36).substring(2) + Math.random().toString(36).substring(2);
@@ -457,7 +457,7 @@
 
             const methods = (adminSettings.payment_methods || "UPI").split(',');
             const sel = document.getElementById('withdraw-method');
-            sel.innerHTML = '<option value="">Choose Method...</option>';
+            sel.innerHTML = '<option value="">Choose Payout Method...</option>';
             methods.forEach(m => {
                 const opt = document.createElement('option');
                 opt.value = m.trim(); opt.innerText = m.trim();
@@ -477,7 +477,7 @@
                     document.getElementById('shorten-result').classList.remove('hidden');
                     document.getElementById('long-url-input').value = '';
                 } catch (e) { safeAlert("Error generating link."); } 
-                finally { this.innerHTML = '<i class="fa-solid fa-wand-magic-sparkles"></i><span>Shorten & Earn</span>'; this.disabled = false; }
+                finally { this.innerHTML = '<i class="fa-solid fa-link"></i><span>Generate Link</span>'; this.disabled = false; }
             });
 
             document.getElementById('btn-copy-link').addEventListener('click', () => copyText(document.getElementById('short-link-display').innerText));
@@ -495,8 +495,8 @@
             const minW = parseFloat(adminSettings.min_withdraw || 5);
             const bal = parseFloat(currentUserData?.balance || 0);
 
-            if(!method) return safeAlert("Please select a payment method.");
-            if(!details) return safeAlert("Please enter payment details.");
+            if(!method) return safeAlert("Please select a payout method.");
+            if(!details) return safeAlert("Please enter account details.");
             if(!amount || isNaN(amount) || amount < minW) return safeAlert(`Minimum withdrawal is $${minW.toFixed(2)}`);
             if(amount > bal) return safeAlert("Insufficient balance!");
 
@@ -571,7 +571,7 @@
             try {
                 const { data: refs } = await dbClient.from('referrals').select('*').eq('referrer_tg_id', currentUserData.telegram_id).order('created_at', { ascending: false });
                 if (!refs || refs.length === 0) {
-                    listContainer.innerHTML = '<div class="text-center text-slate-500 py-6 text-sm glass-panel">You have not referred anyone yet.</div>';
+                    listContainer.innerHTML = '<div class="text-center text-slate-500 py-6 text-sm glass-panel">No affiliate referrals yet.</div>';
                     document.getElementById('stat-referrals').innerText = 0; return;
                 }
                 const refIds = refs.map(r => r.referred_tg_id);
@@ -581,7 +581,7 @@
                 listContainer.innerHTML = '';
                 refs.forEach(ref => {
                     const uName = userNames[ref.referred_tg_id] || "Unknown User";
-                    listContainer.innerHTML += `<div class="glass-panel p-4 flex justify-between items-center mb-3"><span class="font-bold text-white text-sm"><i class="fa-solid fa-user text-slate-500 mr-2"></i>${uName}</span><span class="bg-amber-500/20 text-amber-400 px-2 py-1 rounded text-[10px] font-bold">Registered</span></div>`;
+                    listContainer.innerHTML += `<div class="glass-panel p-4 flex justify-between items-center mb-3"><span class="font-bold text-white text-sm"><i class="fa-solid fa-user text-slate-500 mr-2"></i>${uName}</span><span class="bg-amber-500/20 text-amber-400 px-2 py-1 rounded text-[10px] font-bold">Active</span></div>`;
                 });
                 document.getElementById('stat-referrals').innerText = refs.length;
             } catch (e) { listContainer.innerHTML = '<div class="text-center text-red-400 py-6 text-sm glass-panel">Error loading data.</div>'; }
@@ -603,7 +603,7 @@
                 
                 const linkIds = links.map(l => l.id);
                 const { data: clicks } = await dbClient.from('click_logs').select('created_at').in('link_id', linkIds).gte('created_at', startDate).lt('created_at', endDate);
-                if(!clicks || clicks.length === 0) return listDiv.innerHTML = '<div class="text-center text-slate-500 text-xs py-4">No earnings this month.</div>';
+                if(!clicks || clicks.length === 0) return listDiv.innerHTML = '<div class="text-center text-slate-500 text-xs py-4">No analytics data for this month.</div>';
 
                 let dailyData = {};
                 clicks.forEach(c => {
@@ -626,7 +626,7 @@
 
         function executeAdClick() {
             const btn = document.getElementById('btn-watch-ad'); 
-            btn.innerHTML = `<i class="fa-solid fa-spinner fa-spin mr-2"></i> Loading Ad...`;
+            btn.innerHTML = `<i class="fa-solid fa-spinner fa-spin mr-2"></i> Processing...`;
             btn.disabled = true;
             
             if (adController) {
@@ -636,8 +636,8 @@
                     })
                     .catch((err) => {
                         console.error("Ad error:", err);
-                        safeAlert("Please watch the full ad to get your reward!");
-                        btn.innerHTML = `<i class="fa-solid fa-play"></i><span>Watch Ad & Unlock</span>`;
+                        safeAlert("Please complete the sponsored view to proceed!");
+                        btn.innerHTML = `<i class="fa-solid fa-play"></i><span>Continue to Link</span>`;
                         btn.disabled = false;
                     });
             } else {
@@ -652,9 +652,9 @@
             const getLinkBtn = document.getElementById('btn-get-link');
             
             if (window.invalidClickReason === "self") {
-                safeAlert("⚠️ This is your own link! Earnings and views will not be added.");
+                safeAlert("⚠️ This is your own generated link. Activity is not logged.");
             } else if (window.invalidClickReason === "duplicate") {
-                safeAlert("⚠️ You already viewed this link! Views and earnings won't be counted again.");
+                safeAlert("⚠️ You have already accessed this link previously.");
             } else {
                 let clickerId = tg.initDataUnsafe?.user?.id || 0;
                 try { 
