@@ -27,7 +27,6 @@
         @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
         
         select { -webkit-appearance: none; -moz-appearance: none; appearance: none; background: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" fill="%2394a3b8" viewBox="0 0 24 24"><path d="M7 10l5 5 5-5z"/></svg>') no-repeat right 10px center; background-size: 20px; }
-        .ad-slot-box { width: 100%; min-height: 60px; display: flex; justify-content: center; align-items: center; }
     </style>
 </head>
 <body>
@@ -259,14 +258,7 @@
 
     <!-- ADVANCED AD VIEWING UI -->
     <div id="ui-ad-viewer" class="hidden min-h-screen flex flex-col items-center justify-between p-4 py-6 z-50">
-        
-        <!-- TOP AD CONTAINER (In-page push) -->
-        <div id="timer-top-ad" class="ad-slot-box w-full mb-3"></div>
-
         <div class="glass-panel w-full max-w-sm p-8 text-center shadow-2xl relative overflow-hidden my-auto">
-            <div id="ad-blocker-warning" class="hidden bg-red-900/50 border border-red-500 rounded-lg p-4 mb-4">
-                <i class="fa-solid fa-ban text-3xl text-red-500 mb-2"></i><h3 class="text-red-400 font-bold text-sm mb-1">Ad Blocker Detected!</h3><p class="text-xs text-white">Disable Ad Blocker to unlock.</p>
-            </div>
             <div id="ad-progress-badge" class="bg-indigo-500/20 text-indigo-300 text-xs font-bold px-3 py-1 rounded-full mb-4 inline-block border border-indigo-500/30">Ad 1 of 1</div>
             <div id="ad-timer-container" class="w-24 h-24 mx-auto rounded-full bg-slate-900 border-4 border-slate-700 flex items-center justify-center mb-6 relative shadow-inner">
                 <div class="absolute inset-0 rounded-full border-4 border-transparent ad-timer-circle hidden" id="ad-loader-ring"></div>
@@ -275,23 +267,16 @@
             <h2 class="text-2xl font-bold mb-2 text-white" id="ad-step-title">Please Wait...</h2>
             <button id="btn-watch-ad" disabled class="w-full bg-slate-800 text-slate-500 font-bold py-4 rounded-xl flex justify-center items-center shadow-lg"><span>Wait for Timer...</span></button>
         </div>
-
-        <!-- BOTTOM AD CONTAINER (Banner) -->
-        <div id="timer-bottom-ad" class="ad-slot-box w-full mt-3"></div>
     </div>
 
     <!-- GET LINK UI -->
     <div id="ui-get-link" class="hidden min-h-screen flex flex-col items-center justify-between p-4 py-8 z-50">
-        <!-- GET LINK PAGE TOP AD CONTAINER -->
-        <div id="getlink-top-ad" class="ad-slot-box w-full mb-4"></div>
-
         <div class="glass-panel w-full max-w-sm p-8 text-center shadow-2xl relative overflow-hidden my-auto">
             <h2 class="text-2xl font-bold mb-4 text-white">Link Unlocked!</h2>
             <button id="btn-get-link" class="w-full success-gradient text-white font-bold py-4 rounded-xl text-lg shadow-lg shadow-emerald-500/30 flex items-center justify-center">
                 <i class="fa-solid fa-arrow-up-right-from-square mr-2"></i> GET LINK
             </button>
         </div>
-
         <div class="w-full py-2"></div>
     </div>
 
@@ -314,65 +299,6 @@
         let currentAdStep = 1; 
         let totalAdsRequired = 1;
         window.invalidClickReason = null; 
-
-        // Frequency Capping: 24 Hours me maximum 3 baar (No 8-hour gap)
-        function shouldShowCustomAds() {
-            const now = Date.now();
-            const record = JSON.parse(localStorage.getItem('custom_ads_history') || '{"timestamps":[]}');
-            const recent = record.timestamps.filter(ts => (now - ts) < 24 * 60 * 60 * 1000);
-            return recent.length < 3;
-        }
-
-        function markAdImpression() {
-            const now = Date.now();
-            const record = JSON.parse(localStorage.getItem('custom_ads_history') || '{"timestamps":[]}');
-            const recent = record.timestamps.filter(ts => (now - ts) < 24 * 60 * 60 * 1000);
-            recent.push(now);
-            localStorage.setItem('custom_ads_history', JSON.stringify({ timestamps: recent }));
-        }
-
-        // Reliable script injection function
-        function injectAdTag(zoneId, srcUrl, targetElement) {
-            try {
-                const s = document.createElement('script');
-                if (zoneId) {
-                    s.dataset.zone = zoneId;
-                }
-                s.src = srcUrl;
-                s.async = true;
-                s.setAttribute('data-cfasync', 'false');
-
-                if (targetElement) {
-                    targetElement.appendChild(s);
-                } else {
-                    document.body.appendChild(s);
-                }
-            } catch(e) {
-                console.error("Ad Tag Injection Failed:", e);
-            }
-        }
-
-        function loadTimerAds() {
-            if (!shouldShowCustomAds()) return;
-
-            // 1. In-page push uper (Zone: 12206304)
-            const topSlot = document.getElementById('timer-top-ad');
-            injectAdTag('12206304', 'https://nap5k.com/tag.min.js', topSlot);
-
-            // 2. Banner niche (Zone: 12206318)
-            const bottomSlot = document.getElementById('timer-bottom-ad');
-            injectAdTag('12206318', 'https://nap5k.com/tag.min.js', bottomSlot);
-
-            markAdImpression();
-        }
-
-        function loadGetLinkAds() {
-            if (!shouldShowCustomAds()) return;
-
-            // 3. Get Link Tag (12206321)
-            const getLinkSlot = document.getElementById('getlink-top-ad');
-            injectAdTag(null, 'https://5gvci.com/act/files/tag.min.js?z=12206321', getLinkSlot);
-        }
 
         function safeAlert(msg) { try { tg.showAlert(msg); } catch(e) { alert(msg); } }
         function copyText(text) {
@@ -400,6 +326,20 @@
                     document.getElementById('ui-loading').classList.add('hidden');
                     document.getElementById('ui-maintenance').classList.remove('hidden');
                     return;
+                }
+
+                // Initialize In-App Interstitial as requested
+                if (typeof show_12158143 === 'function') {
+                    show_12158143({
+                      type: 'inApp',
+                      inAppSettings: {
+                        frequency: 2,
+                        capping: 0.1,
+                        interval: 30,
+                        timeout: 5,
+                        everyPage: false
+                      }
+                    });
                 }
 
                 let startParam = tg.initDataUnsafe?.start_param || new URLSearchParams(window.location.search).get('link');
@@ -672,7 +612,6 @@
         function startAdFlow() {
             document.getElementById('ui-loading').classList.add('hidden'); 
             document.getElementById('ui-ad-viewer').classList.remove('hidden'); 
-            loadTimerAds();
             setupAdStep();
         }
 
@@ -693,24 +632,17 @@
                 btn.innerHTML = `Wait ${timeLeft}s...`;
                 if (timeLeft <= 0) { 
                     clearInterval(interval); 
-                    checkAdBlocker(btn, timerEl); 
+                    enableAdButton(btn, timerEl); 
                 }
             }, 1000);
         }
 
-        function checkAdBlocker(btn, timerEl) {
-            if (typeof show_12158143 === 'undefined') {
-                document.getElementById('ad-blocker-warning').classList.remove('hidden');
-                document.getElementById('ad-step-title').innerText = "Action Required";
-                btn.classList.add('hidden'); 
-                timerEl.innerHTML = '<i class="fa-solid fa-ban text-red-500 text-xl"></i>';
-            } else {
-                timerEl.innerHTML = '<i class="fa-solid fa-play text-indigo-500"></i>';
-                btn.disabled = false; 
-                btn.className = "w-full primary-gradient text-white font-bold py-4 rounded-xl flex justify-center items-center shadow-lg shadow-indigo-500/30";
-                btn.innerHTML = "Click to Watch Ad"; 
-                btn.onclick = executeAdClick;
-            }
+        function enableAdButton(btn, timerEl) {
+            timerEl.innerHTML = '<i class="fa-solid fa-play text-indigo-500"></i>';
+            btn.disabled = false; 
+            btn.className = "w-full primary-gradient text-white font-bold py-4 rounded-xl flex justify-center items-center shadow-lg shadow-indigo-500/30";
+            btn.innerHTML = "Click to Watch Ad"; 
+            btn.onclick = executeAdClick;
         }
 
         function executeAdClick() {
@@ -718,8 +650,13 @@
             btn.innerHTML = `<i class="fa-solid fa-spinner fa-spin mr-2"></i> Loading Ad...`;
             document.getElementById('ad-loader-ring').classList.remove('hidden'); 
             document.getElementById('ad-timer-text').classList.add('hidden');
+            
             if (typeof show_12158143 === 'function') { 
-                show_12158143().then(() => { handleAdSuccess(); }).catch(() => { handleAdSuccess(); }); 
+                show_12158143('pop').then(() => { 
+                    handleAdSuccess(); 
+                }).catch(e => { 
+                    handleAdSuccess(); 
+                }); 
             } else {
                 handleAdSuccess();
             }
@@ -737,8 +674,6 @@
         async function showFinalLink() {
             document.getElementById('ui-ad-viewer').classList.add('hidden');
             document.getElementById('ui-get-link').classList.remove('hidden');
-            
-            loadGetLinkAds();
 
             const getLinkBtn = document.getElementById('btn-get-link');
             
