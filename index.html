@@ -235,4 +235,499 @@
                         <div class="flex items-center"><i class="fa-solid fa-shield-halved w-8 text-slate-400 text-lg text-center"></i><span class="text-sm text-slate-300 ml-2">Privacy Policy</span></div>
                         <i class="fa-solid fa-chevron-right text-xs text-slate-600"></i>
                     </a>
-                    <a id="link-terms" href="#" target="_blank" class="hidden items-center justify-betw
+                    <a id="link-terms" href="#" target="_blank" class="hidden items-center justify-between p-4 hover:bg-slate-800/50 rounded-xl transition border-t border-slate-700/50">
+                        <div class="flex items-center"><i class="fa-solid fa-file-contract w-8 text-slate-400 text-lg text-center"></i><span class="text-sm text-slate-300 ml-2">Terms of Service</span></div>
+                        <i class="fa-solid fa-chevron-right text-xs text-slate-600"></i>
+                    </a>
+                </div>
+
+                <div class="text-center text-[10px] text-slate-500 mt-8 mb-2">Powered by <span class="font-bold text-indigo-400">Short2Earn</span></div>
+            </div>
+        </div>
+
+        <nav class="fixed bottom-0 left-0 w-full bg-[#0f172a]/95 backdrop-blur-xl border-t border-slate-800 z-40 pb-safe">
+            <div class="flex justify-between items-end px-2 pt-2 pb-3">
+                <button class="nav-btn nav-item active flex flex-col items-center w-1/5" data-target="page-home"><div class="nav-icon w-10 h-10 rounded-xl flex items-center justify-center text-lg mb-1"><i class="fa-solid fa-house"></i></div><span class="text-[10px] font-medium tracking-wide">Home</span></button>
+                <button class="nav-btn nav-item flex flex-col items-center w-1/5" data-target="page-links"><div class="nav-icon w-10 h-10 rounded-xl flex items-center justify-center text-lg mb-1"><i class="fa-solid fa-link"></i></div><span class="text-[10px] font-medium tracking-wide">Links</span></button>
+                <button class="nav-btn nav-item flex flex-col items-center w-1/5" data-target="page-refer"><div class="nav-icon w-10 h-10 rounded-xl flex items-center justify-center text-lg mb-1"><i class="fa-solid fa-users"></i></div><span class="text-[10px] font-medium tracking-wide">Refer</span></button>
+                <button class="nav-btn nav-item flex flex-col items-center w-1/5" data-target="page-wallet"><div class="nav-icon w-10 h-10 rounded-xl flex items-center justify-center text-lg mb-1"><i class="fa-solid fa-wallet"></i></div><span class="text-[10px] font-medium tracking-wide">Wallet</span></button>
+                <button class="nav-btn nav-item flex flex-col items-center w-1/5" data-target="page-profile"><div class="nav-icon w-10 h-10 rounded-xl flex items-center justify-center text-lg mb-1"><i class="fa-solid fa-user"></i></div><span class="text-[10px] font-medium tracking-wide">Profile</span></button>
+            </div>
+        </nav>
+    </div>
+
+    <!-- ADVANCED AD VIEWING UI -->
+    <div id="ui-ad-viewer" class="hidden min-h-screen flex flex-col items-center justify-between p-4 py-6 z-50">
+        <div class="glass-panel w-full max-w-sm p-8 text-center shadow-2xl relative overflow-hidden my-auto">
+            <div id="ad-progress-badge" class="bg-indigo-500/20 text-indigo-300 text-xs font-bold px-3 py-1 rounded-full mb-4 inline-block border border-indigo-500/30">Ad 1 of 1</div>
+            <div id="ad-timer-container" class="w-24 h-24 mx-auto rounded-full bg-slate-900 border-4 border-slate-700 flex items-center justify-center mb-6 relative shadow-inner">
+                <div class="absolute inset-0 rounded-full border-4 border-transparent ad-timer-circle hidden" id="ad-loader-ring"></div>
+                <span id="ad-timer-text" class="text-3xl font-bold text-white">5</span>
+            </div>
+            <h2 class="text-2xl font-bold mb-2 text-white" id="ad-step-title">Please Wait...</h2>
+            <button id="btn-watch-ad" disabled class="w-full bg-slate-800 text-slate-500 font-bold py-4 rounded-xl flex justify-center items-center shadow-lg"><span>Wait for Timer...</span></button>
+        </div>
+    </div>
+
+    <!-- GET LINK UI -->
+    <div id="ui-get-link" class="hidden min-h-screen flex flex-col items-center justify-between p-4 py-8 z-50">
+        <div class="glass-panel w-full max-w-sm p-8 text-center shadow-2xl relative overflow-hidden my-auto">
+            <h2 class="text-2xl font-bold mb-4 text-white">Link Unlocked!</h2>
+            <button id="btn-get-link" class="w-full success-gradient text-white font-bold py-4 rounded-xl text-lg shadow-lg shadow-emerald-500/30 flex items-center justify-center">
+                <i class="fa-solid fa-arrow-up-right-from-square mr-2"></i> GET LINK
+            </button>
+        </div>
+        <div class="w-full py-2"></div>
+    </div>
+
+    <script>
+        const SUPABASE_URL = 'https://uxyrvqhxtegstxhuvxre.supabase.co'; 
+        const SUPABASE_ANON_KEY = 'sb_publishable_iO50h66TI1NByIRI0oH6EQ_pFA7Azct';
+        const VERCEL_API_URL = 'https://short2earn-hqlv.vercel.app/api';
+        
+        const BOT_USERNAME = 'SeetuOfficialbot'; 
+        const APP_SHORT_NAME = 'Mynexify'; 
+
+        let dbClient = window.supabase.createClient(SUPABASE_URL.replace(/\/rest\/v1\/?$/, "").replace(/\/$/, ""), SUPABASE_ANON_KEY);
+        let currentUserData = null;
+        let adminSettings = { cpm: 2, ad_timer: 5, ads_per_link: 1, refer_percent: 10, min_withdraw: 5.0, maintenance_mode: false, payment_methods: "UPI" };
+        
+        const tg = window.Telegram.WebApp;
+        tg.expand();
+        tg.setHeaderColor('#0f172a');
+
+        let currentAdStep = 1; 
+        let totalAdsRequired = 1;
+        window.invalidClickReason = null; 
+
+        // Initialize Adsgram with block ID 56618
+        let adController = null;
+        try {
+            if (typeof window.Adsgram !== 'undefined') {
+                adController = window.Adsgram.init({ blockId: "56618" });
+            }
+        } catch (e) {
+            console.error("Adsgram init error:", e);
+        }
+
+        function safeAlert(msg) { try { tg.showAlert(msg); } catch(e) { alert(msg); } }
+        function copyText(text) {
+            const el = document.createElement('textarea'); el.value = text; document.body.appendChild(el); el.select();
+            try { document.execCommand('copy'); safeAlert("Copied to clipboard!"); } catch (e) {} document.body.removeChild(el);
+        }
+
+        function switchPage(pageId) {
+            document.querySelectorAll('.page-content').forEach(el => el.classList.add('hidden'));
+            document.getElementById(pageId).classList.remove('hidden');
+            document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'));
+            document.querySelector(`.nav-btn[data-target="${pageId}"]`).classList.add('active');
+            
+            if(pageId === 'page-links') loadLinks();
+            if(pageId === 'page-home') generateDateReport();
+            if(pageId === 'page-refer') fetchReferralDetails();
+            if(pageId === 'page-wallet') loadWithdrawalHistory();
+        }
+
+        async function initApp() {
+            try {
+                await loadAdminSettings();
+
+                if (adminSettings.maintenance_mode) {
+                    document.getElementById('ui-loading').classList.add('hidden');
+                    document.getElementById('ui-maintenance').classList.remove('hidden');
+                    return;
+                }
+
+                let startParam = tg.initDataUnsafe?.start_param || new URLSearchParams(window.location.search).get('link');
+                
+                if (tg.initDataUnsafe?.user) {
+                    const user = tg.initDataUnsafe.user;
+                    let { data: existUser } = await dbClient.from('users').select('*').eq('telegram_id', user.id).maybeSingle();
+                    if (existUser && existUser.is_blocked) return document.getElementById('loading-title').innerText = "Account Blocked";
+
+                    if (!existUser) {
+                        const randomToken = Math.random().toString(36).substring(2) + Math.random().toString(36).substring(2);
+                        const { data: newUser } = await dbClient.from('users').insert([{ 
+                            telegram_id: user.id, 
+                            first_name: user.first_name, 
+                            username: user.username,
+                            api_token: randomToken 
+                        }]).select().single();
+                        existUser = newUser;
+
+                        if (startParam && startParam.startsWith('ref_')) {
+                            const referrerId = parseInt(startParam.replace('ref_', ''), 10);
+                            if (referrerId && referrerId !== user.id) {
+                                await dbClient.from('referrals').insert([{ referrer_tg_id: referrerId, referred_tg_id: user.id, status: 'pending' }]);
+                                try {
+                                    fetch(`${VERCEL_API_URL}/process_referral`, {
+                                        method: 'POST', headers: { 'Content-Type': 'application/json' },
+                                        body: JSON.stringify({ referrer_id: referrerId, new_user: user })
+                                    });
+                                } catch(e) {}
+                            }
+                        }
+                    } else if (!existUser.api_token) {
+                        const randomToken = Math.random().toString(36).substring(2) + Math.random().toString(36).substring(2);
+                        await dbClient.from('users').update({ api_token: randomToken }).eq('id', existUser.id);
+                        existUser.api_token = randomToken;
+                    }
+
+                    currentUserData = existUser;
+                }
+
+                if (startParam && startParam.startsWith('link_')) {
+                    window.currentShortId = startParam.replace('link_', '');
+                    await verifyLinkStatus(); 
+                    startAdFlow();
+                } else {
+                    document.getElementById('ui-loading').classList.add('hidden');
+                    document.getElementById('ui-main-app').classList.remove('hidden');
+                    setupDashboard();
+                }
+            } catch(e) { 
+                document.getElementById('loading-text').innerText = "Error: " + e.message; 
+            }
+        }
+
+        async function loadAdminSettings() {
+            const { data } = await dbClient.from('settings').select('*').limit(1).maybeSingle();
+            if(data) adminSettings = { ...adminSettings, ...data };
+            totalAdsRequired = adminSettings.ads_per_link || 1;
+        }
+
+        async function verifyLinkStatus() {
+            try {
+                const { data: linkData } = await dbClient.from('links').select('id, user_id').eq('short_id', window.currentShortId).single();
+                if(linkData && currentUserData) {
+                    if(linkData.user_id === currentUserData.id) { 
+                        window.invalidClickReason = "self"; 
+                        return; 
+                    }
+                    if(currentUserData.telegram_id) {
+                        const { data: logs } = await dbClient.from('click_logs').select('id').eq('link_id', linkData.id).eq('clicker_tg_id', currentUserData.telegram_id);
+                        if(logs && logs.length > 0) window.invalidClickReason = "duplicate";
+                    }
+                }
+            } catch(e) {}
+        }
+
+        function setupDashboard() {
+            document.getElementById('warning-popup').classList.remove('hidden');
+            
+            const u = tg.initDataUnsafe?.user;
+            if(u) {
+                document.getElementById('user-greeting').innerText = `Hello, ${u.first_name}!`;
+                document.getElementById('profile-name').innerText = u.first_name;
+                document.getElementById('profile-avatar').innerText = u.first_name.charAt(0);
+                document.getElementById('profile-id').innerText = `ID: ${u.id}`;
+                document.getElementById('referral-link-display').innerText = `https://t.me/${BOT_USERNAME}/${APP_SHORT_NAME}?startapp=ref_${u.id}`;
+            }
+
+            if(currentUserData?.api_token) {
+                document.getElementById('user-api-token').innerText = currentUserData.api_token;
+            }
+
+            document.getElementById('header-balance').innerText = `$${parseFloat(currentUserData?.balance || 0).toFixed(2)}`;
+            document.getElementById('wallet-balance-page').innerText = `$${parseFloat(currentUserData?.balance || 0).toFixed(2)}`;
+            document.getElementById('stat-today-earn').innerText = `$${parseFloat(currentUserData?.today_earnings || 0).toFixed(4)}`;
+            document.getElementById('stat-views').innerText = currentUserData?.total_clicks || 0;
+            document.getElementById('stat-cpm').innerText = `$${parseFloat(adminSettings.cpm || 0).toFixed(2)}`;
+            document.getElementById('refer-commission').innerText = `${adminSettings.refer_percent || 10}%`;
+            document.getElementById('min-withdraw-display').innerText = `$${parseFloat(adminSettings.min_withdraw || 5).toFixed(2)}`;
+
+            function setupExternalLink(elementId, url) {
+                const el = document.getElementById(elementId);
+                if(url) {
+                    el.classList.remove('hidden');
+                    el.classList.add('flex');
+                    el.onclick = (e) => {
+                        e.preventDefault();
+                        try {
+                            tg.openLink(url);
+                        } catch(err) {
+                            window.open(url, '_blank');
+                        }
+                    };
+                }
+            }
+
+            setupExternalLink('link-tg', adminSettings.tg_channel_url);
+            setupExternalLink('link-yt', adminSettings.yt_channel_url);
+            if(adminSettings.tg_channel_url && adminSettings.yt_channel_url) {
+                document.getElementById('div-line-yt').classList.remove('hidden');
+            }
+            setupExternalLink('link-privacy', adminSettings.privacy_url);
+            setupExternalLink('link-terms', adminSettings.terms_url);
+
+            const methods = (adminSettings.payment_methods || "UPI").split(',');
+            const sel = document.getElementById('withdraw-method');
+            sel.innerHTML = '<option value="">Choose Method...</option>';
+            methods.forEach(m => {
+                const opt = document.createElement('option');
+                opt.value = m.trim(); opt.innerText = m.trim();
+                sel.appendChild(opt);
+            });
+
+            document.querySelectorAll('.nav-btn').forEach(btn => btn.addEventListener('click', function() { switchPage(this.getAttribute('data-target')); }));
+            
+            document.getElementById('btn-shorten').addEventListener('click', async function() {
+                const url = document.getElementById('long-url-input').value.trim();
+                if (!url.startsWith('http')) return safeAlert("Please enter a valid URL (http/https)"); 
+                this.innerHTML = '<i class="fa-solid fa-circle-notch fa-spin"></i>'; this.disabled = true;
+                try {
+                    const shortId = Math.random().toString(36).substring(2, 8);
+                    await dbClient.from('links').insert([{ original_url: url, short_id: shortId, user_id: currentUserData.id, clicks: 0, earnings: 0 }]);
+                    document.getElementById('short-link-display').innerText = `https://t.me/${BOT_USERNAME}/${APP_SHORT_NAME}?startapp=link_${shortId}`;
+                    document.getElementById('shorten-result').classList.remove('hidden');
+                    document.getElementById('long-url-input').value = '';
+                } catch (e) { safeAlert("Error generating link."); } 
+                finally { this.innerHTML = '<i class="fa-solid fa-wand-magic-sparkles"></i><span>Shorten & Earn</span>'; this.disabled = false; }
+            });
+
+            document.getElementById('btn-copy-link').addEventListener('click', () => copyText(document.getElementById('short-link-display').innerText));
+            document.getElementById('btn-copy-referral').addEventListener('click', () => copyText(document.getElementById('referral-link-display').innerText));
+
+            document.getElementById('report-month').value = `${new Date().getFullYear()}-${String(new Date().getMonth() + 1).padStart(2, '0')}`;
+            document.getElementById('report-month').addEventListener('change', generateDateReport);
+            generateDateReport(); fetchReferralDetails();
+        }
+
+        window.submitWithdrawal = async function() {
+            const method = document.getElementById('withdraw-method').value;
+            const details = document.getElementById('withdraw-details').value.trim();
+            const amount = parseFloat(document.getElementById('withdraw-amount').value);
+            const minW = parseFloat(adminSettings.min_withdraw || 5);
+            const bal = parseFloat(currentUserData?.balance || 0);
+
+            if(!method) return safeAlert("Please select a payment method.");
+            if(!details) return safeAlert("Please enter payment details.");
+            if(!amount || isNaN(amount) || amount < minW) return safeAlert(`Minimum withdrawal is $${minW.toFixed(2)}`);
+            if(amount > bal) return safeAlert("Insufficient balance!");
+
+            const btn = document.getElementById('btn-submit-withdraw');
+            btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i><span>Processing...</span>'; btn.disabled = true;
+
+            try {
+                const newBal = bal - amount;
+                await dbClient.from('users').update({ balance: newBal }).eq('id', currentUserData.id);
+                await dbClient.from('withdrawals').insert([{
+                    user_id: currentUserData.id,
+                    username: tg.initDataUnsafe?.user?.username || tg.initDataUnsafe?.user?.first_name || 'User',
+                    amount: amount, method: method, details: details, status: 'pending'
+                }]);
+
+                currentUserData.balance = newBal;
+                document.getElementById('header-balance').innerText = `$${newBal.toFixed(2)}`;
+                document.getElementById('wallet-balance-page').innerText = `$${newBal.toFixed(2)}`;
+                document.getElementById('withdraw-amount').value = '';
+                document.getElementById('withdraw-details').value = '';
+                safeAlert("Withdrawal Request Submitted Successfully!");
+                loadWithdrawalHistory();
+            } catch(e) { safeAlert("Error submitting request."); }
+            
+            btn.innerHTML = '<i class="fa-solid fa-money-bill-transfer"></i><span>Submit Request</span>'; btn.disabled = false;
+        }
+
+        async function loadWithdrawalHistory() {
+            const list = document.getElementById('withdrawal-history-list');
+            try {
+                const { data } = await dbClient.from('withdrawals').select('*').eq('user_id', currentUserData.id).order('created_at', { ascending: false });
+                if(!data || data.length === 0) return list.innerHTML = '<div class="glass-panel p-6 text-center text-slate-500 text-xs">No transactions yet.</div>';
+                
+                list.innerHTML = '';
+                data.forEach(w => {
+                    const dateStr = new Date(w.created_at).toLocaleDateString();
+                    let color = 'text-amber-400'; let icon = 'fa-clock';
+                    if(w.status === 'approved') { color = 'text-emerald-400'; icon = 'fa-check-double'; }
+                    if(w.status === 'rejected') { color = 'text-red-400'; icon = 'fa-xmark'; }
+
+                    list.innerHTML += `
+                        <div class="glass-panel p-4 flex justify-between items-center mb-3">
+                            <div>
+                                <div class="font-bold text-white text-sm mb-1">${w.method}</div>
+                                <div class="text-[10px] text-slate-400">${dateStr}</div>
+                            </div>
+                            <div class="text-right">
+                                <div class="font-bold text-white mb-1">$${w.amount.toFixed(2)}</div>
+                                <div class="text-[10px] font-bold uppercase ${color}"><i class="fa-solid ${icon} mr-1"></i>${w.status}</div>
+                            </div>
+                        </div>`;
+                });
+            } catch(e) {}
+        }
+
+        async function loadLinks() {
+            const list = document.getElementById('links-list');
+            try {
+                const { data } = await dbClient.from('links').select('*').eq('user_id', currentUserData.id).order('created_at', { ascending: false }).limit(20);
+                if (!data || data.length === 0) return list.innerHTML = '<div class="text-center text-slate-500 py-10">No links created yet.</div>';
+                list.innerHTML = '';
+                data.forEach(l => {
+                    const shortUrl = `https://t.me/${BOT_USERNAME}/${APP_SHORT_NAME}?startapp=link_${l.short_id}`;
+                    list.innerHTML += `<div class="glass-panel p-4 mb-3"><div class="flex justify-between items-start mb-2"><div class="truncate w-3/4"><span class="text-indigo-400 text-xs block truncate">${shortUrl}</span><span class="text-[10px] text-slate-500 block truncate">${l.original_url}</span></div><button onclick="copyText('${shortUrl}')" class="bg-slate-800 p-2 rounded text-indigo-400 hover:text-white"><i class="fa-solid fa-copy"></i></button></div><div class="flex space-x-4 pt-2 border-t border-slate-700/50 text-xs"><div><i class="fa-solid fa-eye text-slate-400"></i> <span class="text-white font-bold">${l.clicks || 0}</span></div><div><i class="fa-solid fa-coins text-emerald-400"></i> <span class="text-emerald-400 font-bold">$${parseFloat(l.earnings || 0).toFixed(4)}</span></div></div></div>`;
+                });
+            } catch(e) {}
+        }
+
+        async function fetchReferralDetails() {
+            if(!currentUserData?.telegram_id) return;
+            const listContainer = document.getElementById('referrals-list');
+            try {
+                const { data: refs } = await dbClient.from('referrals').select('*').eq('referrer_tg_id', currentUserData.telegram_id).order('created_at', { ascending: false });
+                if (!refs || refs.length === 0) {
+                    listContainer.innerHTML = '<div class="text-center text-slate-500 py-6 text-sm glass-panel">You have not referred anyone yet.</div>';
+                    document.getElementById('stat-referrals').innerText = 0; return;
+                }
+                const refIds = refs.map(r => r.referred_tg_id);
+                const { data: usersData } = await dbClient.from('users').select('telegram_id, first_name').in('telegram_id', refIds);
+                let userNames = {}; if(usersData) usersData.forEach(u => userNames[u.telegram_id] = u.first_name);
+
+                listContainer.innerHTML = '';
+                refs.forEach(ref => {
+                    const uName = userNames[ref.referred_tg_id] || "Unknown User";
+                    listContainer.innerHTML += `<div class="glass-panel p-4 flex justify-between items-center mb-3"><span class="font-bold text-white text-sm"><i class="fa-solid fa-user text-slate-500 mr-2"></i>${uName}</span><span class="bg-amber-500/20 text-amber-400 px-2 py-1 rounded text-[10px] font-bold">Registered</span></div>`;
+                });
+                document.getElementById('stat-referrals').innerText = refs.length;
+            } catch (e) { listContainer.innerHTML = '<div class="text-center text-red-400 py-6 text-sm glass-panel">Error loading data.</div>'; }
+        }
+
+        async function generateDateReport() {
+            const listDiv = document.getElementById('earnings-list');
+            const monthStr = document.getElementById('report-month').value;
+            if(!monthStr || !currentUserData?.id) return;
+            listDiv.innerHTML = '<div class="text-center text-slate-500 py-4"><i class="fa-solid fa-circle-notch fa-spin"></i> Fetching...</div>';
+
+            const [year, month] = monthStr.split('-');
+            const startDate = new Date(year, month - 1, 1).toISOString();
+            const endDate = new Date(year, month, 1).toISOString();
+
+            try {
+                const { data: links } = await dbClient.from('links').select('id').eq('user_id', currentUserData.id);
+                if(!links || links.length === 0) return listDiv.innerHTML = '<div class="text-center text-slate-500 text-xs py-4">No data found.</div>';
+                
+                const linkIds = links.map(l => l.id);
+                const { data: clicks } = await dbClient.from('click_logs').select('created_at').in('link_id', linkIds).gte('created_at', startDate).lt('created_at', endDate);
+                if(!clicks || clicks.length === 0) return listDiv.innerHTML = '<div class="text-center text-slate-500 text-xs py-4">No earnings this month.</div>';
+
+                let dailyData = {};
+                clicks.forEach(c => {
+                    const dateStr = new Date(c.created_at).toLocaleDateString();
+                    if(!dailyData[dateStr]) dailyData[dateStr] = 0; 
+                    dailyData[dateStr] += (adminSettings.cpm / 1000);
+                });
+
+                listDiv.innerHTML = '';
+                for (const [date, earn] of Object.entries(dailyData)) {
+                    listDiv.innerHTML += `<div class="flex justify-between items-center bg-slate-800/50 p-3 rounded-lg border border-slate-700/50"><span class="text-sm text-slate-300"><i class="fa-regular fa-calendar text-indigo-400 mr-2"></i>${date}</span><span class="font-bold text-emerald-400">+$${earn.toFixed(4)}</span></div>`;
+                }
+            } catch(e) {}
+        }
+
+        function startAdFlow() {
+            document.getElementById('ui-loading').classList.add('hidden'); 
+            document.getElementById('ui-ad-viewer').classList.remove('hidden'); 
+            setupAdStep();
+        }
+
+        function setupAdStep() {
+            document.getElementById('ad-progress-badge').innerText = `Ad ${currentAdStep} of ${totalAdsRequired}`;
+            document.getElementById('ad-timer-text').classList.remove('hidden'); 
+            document.getElementById('ad-loader-ring').classList.add('hidden');
+            let timeLeft = adminSettings.ad_timer || 5;
+            const btn = document.getElementById('btn-watch-ad'); 
+            const timerEl = document.getElementById('ad-timer-text');
+            btn.disabled = true; 
+            btn.className = "w-full bg-slate-800 text-slate-500 font-bold py-4 rounded-xl flex justify-center items-center shadow-inner";
+            btn.innerHTML = `Wait ${timeLeft}s...`;
+            
+            const interval = setInterval(() => {
+                timeLeft--; 
+                timerEl.innerText = timeLeft; 
+                btn.innerHTML = `Wait ${timeLeft}s...`;
+                if (timeLeft <= 0) { 
+                    clearInterval(interval); 
+                    enableAdButton(btn, timerEl); 
+                }
+            }, 1000);
+        }
+
+        function enableAdButton(btn, timerEl) {
+            timerEl.innerHTML = '<i class="fa-solid fa-play text-indigo-500"></i>';
+            btn.disabled = false; 
+            btn.className = "w-full primary-gradient text-white font-bold py-4 rounded-xl flex justify-center items-center shadow-lg shadow-indigo-500/30";
+            btn.innerHTML = "Click to Watch Ad"; 
+            btn.onclick = executeAdClick;
+        }
+
+        function executeAdClick() {
+            const btn = document.getElementById('btn-watch-ad'); 
+            btn.innerHTML = `<i class="fa-solid fa-spinner fa-spin mr-2"></i> Loading Ad...`;
+            document.getElementById('ad-loader-ring').classList.remove('hidden'); 
+            document.getElementById('ad-timer-text').classList.add('hidden');
+            
+            if (adController) {
+                adController.show()
+                    .then((result) => {
+                        handleAdSuccess();
+                    })
+                    .catch((err) => {
+                        console.error("Ad error:", err);
+                        safeAlert("Please watch the full ad to get your reward!");
+                        document.getElementById('ui-ad-viewer').classList.remove('hidden');
+                        setupAdStep();
+                    });
+            } else {
+                handleAdSuccess();
+            }
+        }
+
+        function handleAdSuccess() {
+            if (currentAdStep < totalAdsRequired) { 
+                currentAdStep++; 
+                setupAdStep(); 
+            } else { 
+                showFinalLink(); 
+            }
+        }
+
+        async function showFinalLink() {
+            document.getElementById('ui-ad-viewer').classList.add('hidden');
+            document.getElementById('ui-get-link').classList.remove('hidden');
+
+            const getLinkBtn = document.getElementById('btn-get-link');
+            
+            if (window.invalidClickReason === "self") {
+                safeAlert("⚠️ This is your own link! Earnings and views will not be added.");
+            } else if (window.invalidClickReason === "duplicate") {
+                safeAlert("⚠️ You already viewed this link! Views and earnings won't be counted again.");
+            } else {
+                let clickerId = tg.initDataUnsafe?.user?.id || 0;
+                try { 
+                    await fetch(`${VERCEL_API_URL}/reward`, { 
+                        method: 'POST', 
+                        headers: { 'Content-Type': 'application/json' }, 
+                        body: JSON.stringify({ 
+                            short_id: window.currentShortId, 
+                            clicker_tg_id: clickerId 
+                        }) 
+                    }); 
+                } catch(e) {
+                    console.error("Reward API Failed:", e);
+                }
+            }
+
+            try {
+                const { data } = await dbClient.from('links').select('original_url').eq('short_id', window.currentShortId).single();
+                if(data && data.original_url) {
+                    getLinkBtn.onclick = () => tg.openLink(data.original_url);
+                }
+            } catch(e) {
+                console.error("Error fetching original URL:", e);
+            }
+        }
+
+        window.onload = initApp;
+    </script>
+</body>
+</html>
