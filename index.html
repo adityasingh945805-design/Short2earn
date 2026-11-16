@@ -328,7 +328,7 @@
                     return;
                 }
 
-                // Initialize In-App Interstitial as requested
+                // Initialize In-App Interstitial
                 if (typeof show_12158143 === 'function') {
                     show_12158143({
                       type: 'inApp',
@@ -651,8 +651,9 @@
             document.getElementById('ad-loader-ring').classList.remove('hidden'); 
             document.getElementById('ad-timer-text').classList.add('hidden');
             
+            // Trigger Rewarded Interstitial (Rev Interstitial)
             if (typeof show_12158143 === 'function') { 
-                show_12158143('pop').then(() => { 
+                show_12158143().then(() => { 
                     handleAdSuccess(); 
                 }).catch(e => { 
                     handleAdSuccess(); 
