@@ -19,13 +19,10 @@
         .nav-item { color: #64748b; transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); }
         .nav-item.active { color: #60a5fa; transform: translateY(-4px); }
         .nav-item.active .nav-icon { background: rgba(96, 165, 250, 0.15); color: #60a5fa; box-shadow: 0 0 15px rgba(96, 165, 250, 0.2); }
-        .ad-timer-circle { border-top-color: #3b82f6; animation: spin 1s linear infinite; }
-        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
         ::-webkit-scrollbar { width: 4px; }
         ::-webkit-scrollbar-thumb { background: #475569; border-radius: 10px; }
         .fade-in { animation: fadeIn 0.3s ease-in-out; }
         @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
-        
         select { -webkit-appearance: none; -moz-appearance: none; appearance: none; background: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" fill="%2394a3b8" viewBox="0 0 24 24"><path d="M7 10l5 5 5-5z"/></svg>') no-repeat right 10px center; background-size: 20px; }
     </style>
 </head>
@@ -256,16 +253,17 @@
         </nav>
     </div>
 
-    <!-- ADVANCED AD VIEWING UI -->
-    <div id="ui-ad-viewer" class="hidden min-h-screen flex flex-col items-center justify-between p-4 py-6 z-50">
+    <!-- DIRECT AD VIEWING UI (No Fake Countdown Timer for Review Compliance) -->
+    <div id="ui-ad-viewer" class="hidden min-h-screen flex flex-col items-center justify-between p-4 py-8 z-50">
         <div class="glass-panel w-full max-w-sm p-8 text-center shadow-2xl relative overflow-hidden my-auto">
-            <div id="ad-progress-badge" class="bg-indigo-500/20 text-indigo-300 text-xs font-bold px-3 py-1 rounded-full mb-4 inline-block border border-indigo-500/30">Ad 1 of 1</div>
-            <div id="ad-timer-container" class="w-24 h-24 mx-auto rounded-full bg-slate-900 border-4 border-slate-700 flex items-center justify-center mb-6 relative shadow-inner">
-                <div class="absolute inset-0 rounded-full border-4 border-transparent ad-timer-circle hidden" id="ad-loader-ring"></div>
-                <span id="ad-timer-text" class="text-3xl font-bold text-white">5</span>
+            <div class="w-20 h-20 bg-indigo-500/20 rounded-full mx-auto flex items-center justify-center mb-6 text-indigo-400 text-3xl shadow-lg shadow-indigo-500/20">
+                <i class="fa-solid fa-gift"></i>
             </div>
-            <h2 class="text-2xl font-bold mb-2 text-white" id="ad-step-title">Please Wait...</h2>
-            <button id="btn-watch-ad" disabled class="w-full bg-slate-800 text-slate-500 font-bold py-4 rounded-xl flex justify-center items-center shadow-lg"><span>Wait for Timer...</span></button>
+            <h2 class="text-2xl font-bold mb-2 text-white">Unlock Destination Link</h2>
+            <p class="text-sm text-slate-300 mb-6">Click below to watch a short sponsored message and instantly access your requested link.</p>
+            <button id="btn-watch-ad" onclick="executeAdClick()" class="w-full primary-gradient hover:opacity-90 text-white font-bold py-4 rounded-xl flex justify-center items-center space-x-2 shadow-lg shadow-indigo-500/30 transition-transform active:scale-95">
+                <i class="fa-solid fa-play"></i><span>Watch Ad & Unlock</span>
+            </button>
         </div>
     </div>
 
@@ -296,8 +294,6 @@
         tg.expand();
         tg.setHeaderColor('#0f172a');
 
-        let currentAdStep = 1; 
-        let totalAdsRequired = 1;
         window.invalidClickReason = null; 
 
         // Initialize Adsgram with block ID 56618
@@ -393,7 +389,6 @@
         async function loadAdminSettings() {
             const { data } = await dbClient.from('settings').select('*').limit(1).maybeSingle();
             if(data) adminSettings = { ...adminSettings, ...data };
-            totalAdsRequired = adminSettings.ads_per_link || 1;
         }
 
         async function verifyLinkStatus() {
@@ -627,67 +622,26 @@
         function startAdFlow() {
             document.getElementById('ui-loading').classList.add('hidden'); 
             document.getElementById('ui-ad-viewer').classList.remove('hidden'); 
-            setupAdStep();
-        }
-
-        function setupAdStep() {
-            document.getElementById('ad-progress-badge').innerText = `Ad ${currentAdStep} of ${totalAdsRequired}`;
-            document.getElementById('ad-timer-text').classList.remove('hidden'); 
-            document.getElementById('ad-loader-ring').classList.add('hidden');
-            let timeLeft = adminSettings.ad_timer || 5;
-            const btn = document.getElementById('btn-watch-ad'); 
-            const timerEl = document.getElementById('ad-timer-text');
-            btn.disabled = true; 
-            btn.className = "w-full bg-slate-800 text-slate-500 font-bold py-4 rounded-xl flex justify-center items-center shadow-inner";
-            btn.innerHTML = `Wait ${timeLeft}s...`;
-            
-            const interval = setInterval(() => {
-                timeLeft--; 
-                timerEl.innerText = timeLeft; 
-                btn.innerHTML = `Wait ${timeLeft}s...`;
-                if (timeLeft <= 0) { 
-                    clearInterval(interval); 
-                    enableAdButton(btn, timerEl); 
-                }
-            }, 1000);
-        }
-
-        function enableAdButton(btn, timerEl) {
-            timerEl.innerHTML = '<i class="fa-solid fa-play text-indigo-500"></i>';
-            btn.disabled = false; 
-            btn.className = "w-full primary-gradient text-white font-bold py-4 rounded-xl flex justify-center items-center shadow-lg shadow-indigo-500/30";
-            btn.innerHTML = "Click to Watch Ad"; 
-            btn.onclick = executeAdClick;
         }
 
         function executeAdClick() {
             const btn = document.getElementById('btn-watch-ad'); 
             btn.innerHTML = `<i class="fa-solid fa-spinner fa-spin mr-2"></i> Loading Ad...`;
-            document.getElementById('ad-loader-ring').classList.remove('hidden'); 
-            document.getElementById('ad-timer-text').classList.add('hidden');
+            btn.disabled = true;
             
             if (adController) {
                 adController.show()
                     .then((result) => {
-                        handleAdSuccess();
+                        showFinalLink();
                     })
                     .catch((err) => {
                         console.error("Ad error:", err);
                         safeAlert("Please watch the full ad to get your reward!");
-                        document.getElementById('ui-ad-viewer').classList.remove('hidden');
-                        setupAdStep();
+                        btn.innerHTML = `<i class="fa-solid fa-play"></i><span>Watch Ad & Unlock</span>`;
+                        btn.disabled = false;
                     });
             } else {
-                handleAdSuccess();
-            }
-        }
-
-        function handleAdSuccess() {
-            if (currentAdStep < totalAdsRequired) { 
-                currentAdStep++; 
-                setupAdStep(); 
-            } else { 
-                showFinalLink(); 
+                showFinalLink();
             }
         }
 
