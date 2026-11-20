@@ -8,6 +8,7 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <script src="https://ad.gigapub.tech/script?id=9251"></script>
+    <script src='//libtl.com/sdk.js' data-zone='12158143' data-sdk='show_12158143'></script>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     
     <style>
@@ -262,7 +263,7 @@
             <div id="ad-progress-badge" class="bg-indigo-500/20 text-indigo-300 text-xs font-bold px-3 py-1 rounded-full mb-4 inline-block border border-indigo-500/30">Ad 1 of 1</div>
             <div id="ad-timer-container" class="w-24 h-24 mx-auto rounded-full bg-slate-900 border-4 border-slate-700 flex items-center justify-center mb-6 relative shadow-inner">
                 <div class="absolute inset-0 rounded-full border-4 border-transparent ad-timer-circle hidden" id="ad-loader-ring"></div>
-                <span id="ad-timer-text" class="text-3xl font-bold text-white">5</span>
+                <span id="ad-timer-text" class="text-3xl font-bold text-white">3</span>
             </div>
             <h2 class="text-2xl font-bold mb-2 text-white" id="ad-step-title">Please Wait...</h2>
             <button id="btn-watch-ad" disabled class="w-full bg-slate-800 text-slate-500 font-bold py-4 rounded-xl flex justify-center items-center shadow-lg"><span>Wait for Timer...</span></button>
@@ -290,7 +291,7 @@
 
         let dbClient = window.supabase.createClient(SUPABASE_URL.replace(/\/rest\/v1\/?$/, "").replace(/\/$/, ""), SUPABASE_ANON_KEY);
         let currentUserData = null;
-        let adminSettings = { cpm: 2, ad_timer: 5, ads_per_link: 1, refer_percent: 10, min_withdraw: 5.0, maintenance_mode: false, payment_methods: "UPI" };
+        let adminSettings = { cpm: 2, ad_timer: 3, ads_per_link: 1, refer_percent: 10, min_withdraw: 5.0, maintenance_mode: false, payment_methods: "UPI" };
         
         const tg = window.Telegram.WebApp;
         tg.expand();
@@ -383,6 +384,7 @@
         async function loadAdminSettings() {
             const { data } = await dbClient.from('settings').select('*').limit(1).maybeSingle();
             if(data) adminSettings = { ...adminSettings, ...data };
+            adminSettings.ad_timer = 3;
             totalAdsRequired = adminSettings.ads_per_link || 1;
         }
 
@@ -605,9 +607,10 @@
             document.getElementById('ad-progress-badge').innerText = `Ad ${currentAdStep} of ${totalAdsRequired}`;
             document.getElementById('ad-timer-text').classList.remove('hidden'); 
             document.getElementById('ad-loader-ring').classList.add('hidden');
-            let timeLeft = adminSettings.ad_timer || 5;
+            let timeLeft = 3;
             const btn = document.getElementById('btn-watch-ad'); 
             const timerEl = document.getElementById('ad-timer-text');
+            timerEl.innerText = timeLeft;
             btn.disabled = true; 
             btn.className = "w-full bg-slate-800 text-slate-500 font-bold py-4 rounded-xl flex justify-center items-center shadow-inner";
             btn.innerHTML = `Wait ${timeLeft}s...`;
@@ -633,21 +636,38 @@
 
         function executeAdClick() {
             const btn = document.getElementById('btn-watch-ad'); 
-            btn.innerHTML = `<i class="fa-solid fa-spinner fa-spin mr-2"></i> Loading Ad...`;
+            btn.disabled = true;
+            btn.innerHTML = `<i class="fa-solid fa-spinner fa-spin mr-2"></i> Loading Ad 1/2...`;
             document.getElementById('ad-loader-ring').classList.remove('hidden'); 
             document.getElementById('ad-timer-text').classList.add('hidden');
             
+            const runMonetagThenFinish = () => {
+                btn.innerHTML = `<i class="fa-solid fa-spinner fa-spin mr-2"></i> Loading Ad 2/2...`;
+                if (typeof window.show_12158143 === 'function') {
+                    window.show_12158143()
+                        .then(() => {
+                            handleAdSuccess();
+                        })
+                        .catch(e => {
+                            console.error("Monetag Ad Error:", e);
+                            handleAdSuccess();
+                        });
+                } else {
+                    handleAdSuccess();
+                }
+            };
+
             if (typeof window.showGiga === 'function') {
                 window.showGiga()
                     .then(() => {
-                        handleAdSuccess();
+                        runMonetagThenFinish();
                     })
                     .catch(e => {
                         console.error("GigaPub Ad Error:", e);
-                        handleAdSuccess();
+                        runMonetagThenFinish();
                     });
             } else {
-                handleAdSuccess();
+                runMonetagThenFinish();
             }
         }
 
