@@ -7,25 +7,25 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
-    <script src="https://ad.gigapub.tech/script?id=9251"></script>
     <script src='//libtl.com/sdk.js' data-zone='12158143' data-sdk='show_12158143'></script>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap');
-        body { font-family: 'Poppins', sans-serif; background: #0f172a; color: #f8fafc; padding-bottom: 80px; min-height: 100vh; overflow-x: hidden; -webkit-tap-highlight-color: transparent;}
-        .glass-panel { background: rgba(30, 41, 59, 0.7); backdrop-filter: blur(12px); border: 1px solid rgba(255, 255, 255, 0.08); border-radius: 1.25rem; box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1); }
+        body { font-family: 'Poppins', sans-serif; background: #0f172a; color: #f8fafc; padding-bottom: 84px; min-height: 100vh; overflow-x: hidden; -webkit-tap-highlight-color: transparent;}
+        .glass-panel { background: rgba(30, 41, 59, 0.72); backdrop-filter: blur(12px); border: 1px solid rgba(255, 255, 255, 0.08); border-radius: 1.25rem; box-shadow: 0 4px 30px rgba(0, 0, 0, 0.12); }
         .primary-gradient { background: linear-gradient(135deg, #6366f1 0%, #3b82f6 100%); }
         .success-gradient { background: linear-gradient(135deg, #10b981 0%, #059669 100%); }
-        .nav-item { color: #64748b; transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); }
-        .nav-item.active { color: #60a5fa; transform: translateY(-4px); }
+        .popup-ad-gradient { background: linear-gradient(135deg, #8b5cf6 0%, #ec4899 100%); }
+        .nav-item { color: #64748b; transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1); }
+        .nav-item.active { color: #60a5fa; transform: translateY(-3px); }
         .nav-item.active .nav-icon { background: rgba(96, 165, 250, 0.15); color: #60a5fa; box-shadow: 0 0 15px rgba(96, 165, 250, 0.2); }
         .ad-timer-circle { border-top-color: #3b82f6; animation: spin 1s linear infinite; }
         @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
         ::-webkit-scrollbar { width: 4px; }
         ::-webkit-scrollbar-thumb { background: #475569; border-radius: 10px; }
-        .fade-in { animation: fadeIn 0.3s ease-in-out; }
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        .fade-in { animation: fadeIn 0.25s ease-in-out; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
         
         select { -webkit-appearance: none; -moz-appearance: none; appearance: none; background: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" fill="%2394a3b8" viewBox="0 0 24 24"><path d="M7 10l5 5 5-5z"/></svg>') no-repeat right 10px center; background-size: 20px; }
     </style>
@@ -49,14 +49,13 @@
         </div>
     </div>
 
-    <!-- WARNING POPUP -->
-    <div id="warning-popup" class="fixed inset-0 z-[60] bg-[#0f172a]/90 backdrop-blur-sm flex items-center justify-center hidden fade-in">
-        <div class="glass-panel p-6 m-4 max-w-sm text-center border border-red-500/50 shadow-2xl shadow-red-500/20">
-            <div class="w-16 h-16 bg-red-500/20 rounded-full mx-auto flex items-center justify-center mb-4"><i class="fa-solid fa-triangle-exclamation text-3xl text-red-500"></i></div>
-            <h2 class="text-xl font-bold text-white mb-2">Important Rules!</h2>
-            <p class="text-sm text-slate-300 mb-6"><span class="text-red-400 font-bold">1.</span> NO VPN Allowed.<br><span class="text-red-400 font-bold">2.</span> NO Self-Clicking.<br><br>Violations will result in an instant <span class="font-bold text-red-400">Account BAN</span> without payout.</p>
-            <button onclick="document.getElementById('warning-popup').classList.add('hidden')" class="w-full bg-red-600 hover:bg-red-500 text-white font-bold py-3 rounded-xl transition-all">I Agree</button>
+    <!-- NON-BLOCKING RULE NOTICE BANNER -->
+    <div id="rule-banner" class="hidden mx-4 mb-3 px-4 py-2.5 rounded-xl bg-amber-500/10 border border-amber-500/30 flex items-center justify-between text-[11px] text-amber-200 fade-in">
+        <div class="flex items-center space-x-2 pr-2">
+            <i class="fa-solid fa-shield-halved text-amber-400 text-sm shrink-0"></i>
+            <span>No VPN or self-clicks allowed. Genuine traffic ensures higher CPM & instant payouts.</span>
         </div>
+        <button onclick="dismissRuleBanner()" class="text-amber-300 hover:text-white font-bold px-1.5"><i class="fa-solid fa-xmark"></i></button>
     </div>
 
     <!-- MAIN APP UI -->
@@ -260,21 +259,36 @@
     <!-- ADVANCED AD VIEWING UI -->
     <div id="ui-ad-viewer" class="hidden min-h-screen flex flex-col items-center justify-between p-4 py-6 z-50">
         <div class="glass-panel w-full max-w-sm p-8 text-center shadow-2xl relative overflow-hidden my-auto">
-            <div id="ad-progress-badge" class="bg-indigo-500/20 text-indigo-300 text-xs font-bold px-3 py-1 rounded-full mb-4 inline-block border border-indigo-500/30">Ad 1 of 1</div>
+            <div id="ad-progress-badge" class="bg-indigo-500/20 text-indigo-300 text-xs font-bold px-3 py-1 rounded-full mb-4 inline-block border border-indigo-500/30">Step 1 of 1</div>
             <div id="ad-timer-container" class="w-24 h-24 mx-auto rounded-full bg-slate-900 border-4 border-slate-700 flex items-center justify-center mb-6 relative shadow-inner">
                 <div class="absolute inset-0 rounded-full border-4 border-transparent ad-timer-circle hidden" id="ad-loader-ring"></div>
-                <span id="ad-timer-text" class="text-3xl font-bold text-white">3</span>
+                <span id="ad-timer-text" class="text-3xl font-bold text-white">5</span>
             </div>
-            <h2 class="text-2xl font-bold mb-2 text-white" id="ad-step-title">Please Wait...</h2>
-            <button id="btn-watch-ad" disabled class="w-full bg-slate-800 text-slate-500 font-bold py-4 rounded-xl flex justify-center items-center shadow-lg"><span>Wait for Timer...</span></button>
+            <h2 class="text-xl font-bold mb-1 text-white" id="ad-step-title">Unlock Your Link</h2>
+            <p class="text-xs text-slate-400 mb-6" id="ad-step-subtitle">Complete the ad step below to continue</p>
+
+            <button id="btn-watch-ad" disabled class="w-full bg-slate-800 text-slate-500 font-bold py-4 rounded-xl flex justify-center items-center shadow-inner transition-all">
+                <span>Wait for Timer...</span>
+            </button>
+
+            <button id="btn-popup-ad" onclick="executePopupAd()" class="hidden w-full mt-3 popup-ad-gradient hover:opacity-95 text-white font-semibold py-3 rounded-xl flex justify-center items-center space-x-2 text-xs shadow-lg transition-transform active:scale-95">
+                <i class="fa-solid fa-up-right-from-square"></i>
+                <span>Open Popup Ad Option</span>
+            </button>
+
+            <p id="ad-status-msg" class="text-[11px] text-amber-300 mt-3 min-h-[16px]"></p>
         </div>
     </div>
 
     <!-- GET LINK UI -->
     <div id="ui-get-link" class="hidden min-h-screen flex flex-col items-center justify-between p-4 py-8 z-50">
         <div class="glass-panel w-full max-w-sm p-8 text-center shadow-2xl relative overflow-hidden my-auto">
-            <h2 class="text-2xl font-bold mb-4 text-white">Link Unlocked!</h2>
-            <button id="btn-get-link" class="w-full success-gradient text-white font-bold py-4 rounded-xl text-lg shadow-lg shadow-emerald-500/30 flex items-center justify-center">
+            <div class="w-16 h-16 rounded-full bg-emerald-500/20 border border-emerald-500/30 text-emerald-400 flex items-center justify-center text-2xl mx-auto mb-4">
+                <i class="fa-solid fa-lock-open"></i>
+            </div>
+            <h2 class="text-2xl font-bold mb-2 text-white">Link Unlocked!</h2>
+            <p class="text-xs text-slate-400 mb-6">Your destination link is ready. Tap below to open.</p>
+            <button id="btn-get-link" class="w-full success-gradient hover:opacity-95 text-white font-bold py-4 rounded-xl text-lg shadow-lg shadow-emerald-500/30 flex items-center justify-center transition-transform active:scale-95">
                 <i class="fa-solid fa-arrow-up-right-from-square mr-2"></i> GET LINK
             </button>
         </div>
@@ -291,7 +305,7 @@
 
         let dbClient = window.supabase.createClient(SUPABASE_URL.replace(/\/rest\/v1\/?$/, "").replace(/\/$/, ""), SUPABASE_ANON_KEY);
         let currentUserData = null;
-        let adminSettings = { cpm: 2, ad_timer: 3, ads_per_link: 1, refer_percent: 10, min_withdraw: 5.0, maintenance_mode: false, payment_methods: "UPI" };
+        let adminSettings = { cpm: 2, ad_timer: 5, ads_per_link: 1, refer_percent: 10, min_withdraw: 5.0, maintenance_mode: false, payment_methods: "UPI" };
         
         const tg = window.Telegram.WebApp;
         tg.expand();
@@ -299,12 +313,36 @@
 
         let currentAdStep = 1; 
         let totalAdsRequired = 1;
+        let inAppInitialized = false;
         window.invalidClickReason = null; 
 
-        function safeAlert(msg) { try { tg.showAlert(msg); } catch(e) { alert(msg); } }
+        function safeAlert(msg) { try { tg.showAlert(msg); } catch(e) { console.log(msg); } }
+
         function copyText(text) {
             const el = document.createElement('textarea'); el.value = text; document.body.appendChild(el); el.select();
             try { document.execCommand('copy'); safeAlert("Copied to clipboard!"); } catch (e) {} document.body.removeChild(el);
+        }
+
+        function dismissRuleBanner() {
+            localStorage.setItem('s2e_rule_dismissed', '1');
+            document.getElementById('rule-banner').classList.add('hidden');
+        }
+
+        function initInAppInterstitialOnce() {
+            if (inAppInitialized) return;
+            if (typeof show_12158143 === 'function') {
+                inAppInitialized = true;
+                show_12158143({
+                    type: 'inApp',
+                    inAppSettings: {
+                        frequency: 2,
+                        capping: 0.1,
+                        interval: 45,
+                        timeout: 6,
+                        everyPage: false
+                    }
+                });
+            }
         }
 
         function switchPage(pageId) {
@@ -374,6 +412,7 @@
                 } else {
                     document.getElementById('ui-loading').classList.add('hidden');
                     document.getElementById('ui-main-app').classList.remove('hidden');
+                    initInAppInterstitialOnce();
                     setupDashboard();
                 }
             } catch(e) { 
@@ -384,8 +423,7 @@
         async function loadAdminSettings() {
             const { data } = await dbClient.from('settings').select('*').limit(1).maybeSingle();
             if(data) adminSettings = { ...adminSettings, ...data };
-            adminSettings.ad_timer = 3;
-            totalAdsRequired = adminSettings.ads_per_link || 1;
+            totalAdsRequired = Math.max(1, parseInt(adminSettings.ads_per_link || 1, 10));
         }
 
         async function verifyLinkStatus() {
@@ -405,7 +443,9 @@
         }
 
         function setupDashboard() {
-            document.getElementById('warning-popup').classList.remove('hidden');
+            if (!localStorage.getItem('s2e_rule_dismissed')) {
+                document.getElementById('rule-banner').classList.remove('hidden');
+            }
             
             const u = tg.initDataUnsafe?.user;
             if(u) {
@@ -604,21 +644,23 @@
         }
 
         function setupAdStep() {
-            document.getElementById('ad-progress-badge').innerText = `Ad ${currentAdStep} of ${totalAdsRequired}`;
+            document.getElementById('ad-progress-badge').innerText = `Step ${currentAdStep} of ${totalAdsRequired}`;
+            document.getElementById('ad-status-msg').innerText = '';
             document.getElementById('ad-timer-text').classList.remove('hidden'); 
             document.getElementById('ad-loader-ring').classList.add('hidden');
-            let timeLeft = 3;
+            document.getElementById('btn-popup-ad').classList.add('hidden');
+
+            let timeLeft = adminSettings.ad_timer || 5;
             const btn = document.getElementById('btn-watch-ad'); 
             const timerEl = document.getElementById('ad-timer-text');
-            timerEl.innerText = timeLeft;
             btn.disabled = true; 
             btn.className = "w-full bg-slate-800 text-slate-500 font-bold py-4 rounded-xl flex justify-center items-center shadow-inner";
             btn.innerHTML = `Wait ${timeLeft}s...`;
             
             const interval = setInterval(() => {
                 timeLeft--; 
-                timerEl.innerText = timeLeft; 
-                btn.innerHTML = `Wait ${timeLeft}s...`;
+                timerEl.innerText = Math.max(0, timeLeft); 
+                btn.innerHTML = `Wait ${Math.max(0, timeLeft)}s...`;
                 if (timeLeft <= 0) { 
                     clearInterval(interval); 
                     enableAdButton(btn, timerEl); 
@@ -627,51 +669,74 @@
         }
 
         function enableAdButton(btn, timerEl) {
-            timerEl.innerHTML = '<i class="fa-solid fa-play text-indigo-500"></i>';
+            timerEl.innerHTML = '<i class="fa-solid fa-play text-indigo-400"></i>';
             btn.disabled = false; 
-            btn.className = "w-full primary-gradient text-white font-bold py-4 rounded-xl flex justify-center items-center shadow-lg shadow-indigo-500/30";
-            btn.innerHTML = "Click to Watch Ad"; 
-            btn.onclick = executeAdClick;
+            btn.className = "w-full primary-gradient hover:opacity-95 text-white font-bold py-4 rounded-xl flex justify-center items-center shadow-lg shadow-indigo-500/30 transition-transform active:scale-95";
+            btn.innerHTML = `<i class="fa-solid fa-circle-play mr-2"></i> Watch Rewarded Ad`; 
+            btn.onclick = executeRewardedInterstitialAd;
+            document.getElementById('btn-popup-ad').classList.remove('hidden');
         }
 
-        function executeAdClick() {
-            const btn = document.getElementById('btn-watch-ad'); 
-            btn.disabled = true;
-            btn.innerHTML = `<i class="fa-solid fa-spinner fa-spin mr-2"></i> Loading Ad 1/2...`;
-            document.getElementById('ad-loader-ring').classList.remove('hidden'); 
-            document.getElementById('ad-timer-text').classList.add('hidden');
-            
-            const runMonetagThenFinish = () => {
-                btn.innerHTML = `<i class="fa-solid fa-spinner fa-spin mr-2"></i> Loading Ad 2/2...`;
-                if (typeof window.show_12158143 === 'function') {
-                    window.show_12158143()
-                        .then(() => {
-                            handleAdSuccess();
-                        })
-                        .catch(e => {
-                            console.error("Monetag Ad Error:", e);
-                            handleAdSuccess();
-                        });
-                } else {
-                    handleAdSuccess();
-                }
-            };
+        function setAdLoadingState(isLoading) {
+            const btn = document.getElementById('btn-watch-ad');
+            const popupBtn = document.getElementById('btn-popup-ad');
+            const loader = document.getElementById('ad-loader-ring');
+            const timerEl = document.getElementById('ad-timer-text');
 
-            if (typeof window.showGiga === 'function') {
-                window.showGiga()
-                    .then(() => {
-                        runMonetagThenFinish();
-                    })
-                    .catch(e => {
-                        console.error("GigaPub Ad Error:", e);
-                        runMonetagThenFinish();
-                    });
+            if (isLoading) {
+                btn.disabled = true;
+                popupBtn.disabled = true;
+                btn.innerHTML = `<i class="fa-solid fa-spinner fa-spin mr-2"></i> Loading Ad...`;
+                loader.classList.remove('hidden');
+                timerEl.classList.add('hidden');
             } else {
-                runMonetagThenFinish();
+                btn.disabled = false;
+                popupBtn.disabled = false;
+                loader.classList.add('hidden');
+                timerEl.classList.remove('hidden');
+                timerEl.innerHTML = '<i class="fa-solid fa-rotate-right text-amber-400"></i>';
+                btn.innerHTML = `<i class="fa-solid fa-rotate-right mr-2"></i> Try Ad Again`;
+            }
+        }
+
+        // Primary High-CPM Format: Rewarded Interstitial
+        function executeRewardedInterstitialAd() {
+            document.getElementById('ad-status-msg').innerText = '';
+            setAdLoadingState(true);
+
+            if (typeof show_12158143 === 'function') { 
+                show_12158143().then(() => { 
+                    handleAdSuccess(); 
+                }).catch(() => { 
+                    setAdLoadingState(false);
+                    document.getElementById('ad-status-msg').innerText = "Ad was not completed. Please watch the ad or try Popup option.";
+                }); 
+            } else {
+                setAdLoadingState(false);
+                document.getElementById('ad-status-msg').innerText = "Ad SDK not ready. Please retry in a moment.";
+            }
+        }
+
+        // Secondary Format: Rewarded Popup ('pop')
+        function executePopupAd() {
+            document.getElementById('ad-status-msg').innerText = '';
+            setAdLoadingState(true);
+
+            if (typeof show_12158143 === 'function') {
+                show_12158143('pop').then(() => {
+                    handleAdSuccess();
+                }).catch(() => {
+                    setAdLoadingState(false);
+                    document.getElementById('ad-status-msg').innerText = "Popup ad closed early or unavailable. Please try again.";
+                });
+            } else {
+                setAdLoadingState(false);
+                document.getElementById('ad-status-msg').innerText = "Ad SDK not ready. Please retry in a moment.";
             }
         }
 
         function handleAdSuccess() {
+            document.getElementById('btn-popup-ad').disabled = false;
             if (currentAdStep < totalAdsRequired) { 
                 currentAdStep++; 
                 setupAdStep(); 
@@ -709,7 +774,13 @@
             try {
                 const { data } = await dbClient.from('links').select('original_url').eq('short_id', window.currentShortId).single();
                 if(data && data.original_url) {
-                    getLinkBtn.onclick = () => tg.openLink(data.original_url);
+                    getLinkBtn.onclick = () => {
+                        try {
+                            tg.openLink(data.original_url);
+                        } catch (err) {
+                            window.open(data.original_url, '_blank', 'noopener,noreferrer');
+                        }
+                    };
                 }
             } catch(e) {
                 console.error("Error fetching original URL:", e);
